@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}History – MediTrack AI{% endblock %}
+{% block page_title %}📋 History{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-between align-center">
+  <div>
+    <h1>📋 Medication History</h1>
+    <p>Full record of all logged doses</p>
+  </div>
+  <a href="{{ url_for('reminders.index') }}" class="btn btn-outline btn-sm">← Back to Reminders</a>
+</div>
+
+<div class="card">
+  {% if records %}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Medicine</th>
+            <th>Status</th>
+            <th>Scheduled</th>
+            <th>Logged At</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in records %}
+            <tr>
+              <td style="color:var(--text-muted); font-size:0.8rem;">{{ loop.index + (page-1)*20 }}</td>
+              <td><strong>{{ r['medicine_name'] }}</strong></td>
+              <td><span class="badge badge-{{ r['status'] }}">{{ r['status'].title() }}</span></td>
+              <td style="font-size:0.82rem; color:var(--text-muted);">{{ r['scheduled_time'] or '—' }}</td>
+              <td style="font-size:0.82rem; color:var(--text-muted);">{{ r['taken_at'][:16] }}</td>
+              <td style="font-size:0.82rem; color:var(--text-secondary);">{{ r['notes'] or '—' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+      <div style="display:flex; gap:8px; justify-content:center; margin-top:16px;">
+        {% if page > 1 %}
+          <a href="?page={{ page - 1 }}" class="btn btn-outline btn-sm">← Prev</a>
+        {% endif %}
+        <span style="padding:7px 14px; font-size:0.85rem; color:var(--text-muted);">
+          Page {{ page }} of {{ total_pages }}
+        </span>
+        {% if page < total_pages %}
+          <a href="?page={{ page + 1 }}" class="btn btn-outline btn-sm">Next →</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>No history yet</h3>
+      <p>Mark medicines as taken or missed to build your history</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

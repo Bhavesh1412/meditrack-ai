@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block title %}Insights – MediTrack AI{% endblock %}
+{% block page_title %}📊 Insights{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>📊 Health Insights</h1>
+  <p>Analytics and patterns from your medication history</p>
+</div>
+
+<!-- ─── SUMMARY STATS ──────────────────────────────────────────── -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon blue">💊</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ total_medicines }}</div>
+      <div class="stat-label">Active Medicines</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green">✅</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ total_taken }}</div>
+      <div class="stat-label">Total Doses Taken</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon red">❌</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ total_missed }}</div>
+      <div class="stat-label">Total Doses Missed</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon purple">📈</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ adherence }}%</div>
+      <div class="stat-label">Overall Adherence</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon orange">⚠️</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ total_side_effects }}</div>
+      <div class="stat-label">Side Effects Reported</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── CHARTS GRID ────────────────────────────────────────────── -->
+<div class="grid-2 mt-2">
+
+  <!-- 14-Day Adherence Line Chart -->
+  <div class="chart-card" style="grid-column: 1 / -1;">
+    <div class="card-header">
+      <span class="card-title">📈 14-Day Adherence Trend</span>
+    </div>
+    <div class="chart-container" style="height: 280px;">
+      <canvas id="adherenceChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Side Effects Doughnut -->
+  <div class="chart-card">
+    <div class="card-header">
+      <span class="card-title">⚠️ Side Effect Severity</span>
+    </div>
+    <div class="chart-container" style="height: 260px;">
+      <canvas id="sideEffectChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Per-Medicine Bar Chart -->
+  <div class="chart-card">
+    <div class="card-header">
+      <span class="card-title">💊 Per-Medicine Adherence</span>
+    </div>
+    <div class="chart-container" style="height: 260px;">
+      <canvas id="medicineChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─── ADHERENCE GAUGE ────────────────────────────────────────── -->
+<div class="card mt-3">
+  <div class="card-header">
+    <span class="card-title">🎯 Overall Adherence Progress</span>
+    <span class="badge {{ 'badge-success' if adherence >= 80 else ('badge-warning' if adherence >= 50 else 'badge-danger') }}">
+      {{ 'Excellent' if adherence >= 80 else ('Good' if adherence >= 50 else 'Needs Improvement') }}
+    </span>
+  </div>
+  <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">
+    You took {{ total_taken }} out of {{ total_taken + total_missed }} scheduled doses
+  </div>
+  <div class="progress-bar-wrapper" style="height: 16px;">
+    <div class="progress-bar" style="width: {{ adherence }}%"></div>
+  </div>
+  <div style="display:flex; justify-content:space-between; margin-top: 6px;
+              font-size: 0.78rem; color: var(--text-muted);">
+    <span>0%</span>
+    <span style="color: var(--primary); font-weight: 700;">{{ adherence }}%</span>
+    <span>100%</span>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+  // ── Shared chart defaults ──────────────────────────────────────
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.color       = '#475569';
+
+  const PRIMARY  = '#2563eb';
+  const SUCCESS  = '#22c55e';
+  const DANGER   = '#ef4444';
+  const WARNING  = '#f59e0b';
+  const INFO     = '#0ea5e9';
+
+  // ── 1. 14-Day Adherence Line Chart ─────────────────────────────
+  async function loadAdherenceChart() {
+    const res  = await fetch('/insights/api/adherence');
+    const data = await res.json();
+
+    new Chart(document.getElementById('adherenceChart'), {
+      type: 'line',
+      data: {
+        labels: data.labels,
+        datasets: [
+          {
+            label: 'Taken',
+            data: data.taken,
+            borderColor: SUCCESS,
+            backgroundColor: 'rgba(34,197,94,0.1)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: SUCCESS,
+            pointRadius: 4,
+          },
+          {
+            label: 'Missed',
+            data: data.missed,
+            borderColor: DANGER,
+            backgroundColor: 'rgba(239,68,68,0.08)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: DANGER,
+            pointRadius: 4,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: { mode: 'index', intersect: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { stepSize: 1 },
+            grid: { color: 'rgba(0,0,0,0.05)' }
+          },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // ── 2. Side Effects Doughnut ────────────────────────────────────
+  async function loadSideEffectChart() {
+    const res  = await fetch('/insights/api/side-effects');
+    const data = await res.json();
+    const total = data.values.reduce((a, b) => a + b, 0);
+
+    new Chart(document.getElementById('sideEffectChart'), {
+      type: 'doughnut',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          data: data.values,
+          backgroundColor: [SUCCESS, WARNING, DANGER],
+          borderWidth: 2,
+          borderColor: '#fff',
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                const val = ctx.parsed;
+                const pct = total ? Math.round(val / total * 100) : 0;
+                return ` ${ctx.label}: ${val} (${pct}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ── 3. Per-Medicine Horizontal Bar ─────────────────────────────
+  async function loadMedicineChart() {
+    const res  = await fetch('/insights/api/medicines');
+    const data = await res.json();
+
+    if (!data.labels.length) {
+      document.getElementById('medicineChart').parentElement.innerHTML =
+        '<div class="empty-state"><div class="empty-icon">💊</div><h3>No history yet</h3><p>Mark doses to see per-medicine data</p></div>';
+      return;
+    }
+
+    new Chart(document.getElementById('medicineChart'), {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [
+          {
+            label: 'Taken',
+            data: data.taken,
+            backgroundColor: 'rgba(34,197,94,0.8)',
+            borderRadius: 6,
+          },
+          {
+            label: 'Missed',
+            data: data.missed,
+            backgroundColor: 'rgba(239,68,68,0.7)',
+            borderRadius: 6,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',    // Horizontal bars
+        plugins: { legend: { position: 'bottom' } },
+        scales: {
+          x: { beginAtZero: true, ticks: { stepSize: 1 }, stacked: false },
+          y: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // Load all charts
+  loadAdherenceChart();
+  loadSideEffectChart();
+  loadMedicineChart();
+</script>
+{% endblock %}

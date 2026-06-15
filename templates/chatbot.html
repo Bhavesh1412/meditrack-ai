@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}AI Assistant – MediTrack AI{% endblock %}
+{% block page_title %}🤖 AI Assistant{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-flex justify-between align-center">
+  <div>
+    <h1>🤖 AI Health Assistant</h1>
+    <p>Ask MediBot about medications, side effects, and general health</p>
+  </div>
+  <button class="btn btn-outline btn-sm" onclick="clearChat()">🗑️ Clear Chat</button>
+</div>
+
+<!-- Disclaimer -->
+<div class="chat-disclaimer">
+  ⚠️ <strong>Disclaimer:</strong> MediBot provides general health information only.
+  This chatbot does <strong>not</strong> replace professional medical advice.
+  Always consult a qualified healthcare provider for medical decisions.
+</div>
+
+<!-- Chat Container -->
+<div class="card" style="padding: 0; overflow: hidden;">
+  <div class="chat-container">
+
+    <!-- Messages area -->
+    <div class="chat-messages" id="chatMessages">
+
+      <!-- Welcome message -->
+      <div class="chat-bubble bot">
+        <div>👋 Hi! I'm <strong>MediBot</strong>, your AI health assistant.</div>
+        <div style="margin-top: 8px;">I can help with:</div>
+        <ul style="margin: 6px 0 0 16px; font-size: 0.85rem;">
+          <li>💊 Medication questions</li>
+          <li>⚠️ Side effect information</li>
+          <li>📅 Dosage and timing advice</li>
+          <li>🏥 General health guidance</li>
+        </ul>
+        <div class="bubble-meta">MediBot · AI Assistant</div>
+      </div>
+
+      <!-- Previous chat history from DB -->
+      {% for msg in history %}
+        <div class="chat-bubble {{ msg['role'] == 'user' and 'user' or 'bot' }}">
+          {{ msg['message'] }}
+          <div class="bubble-meta">
+            {{ 'You' if msg['role'] == 'user' else 'MediBot' }} ·
+            {{ msg['created_at'][11:16] }}
+          </div>
+        </div>
+      {% endfor %}
+
+    </div>
+
+    <!-- Input area -->
+    <div class="chat-input-area">
+      <input
+        type="text"
+        class="chat-input"
+        id="chatInput"
+        placeholder="Ask about your medicines, side effects, dosage..."
+        maxlength="500"
+        autocomplete="off"
+      />
+      <button class="chat-send-btn" id="sendBtn" onclick="sendMessage()" title="Send">
+        ➤
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Quick question chips -->
+<div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px;">
+  <span style="font-size: 0.78rem; color: var(--text-muted); align-self: center;">Try asking:</span>
+  {% for q in [
+    "What are common side effects of ibuprofen?",
+    "What should I do if I missed a dose?",
+    "How does paracetamol work?",
+    "What is the maximum daily dose of paracetamol?",
+    "Can I take antibiotics with food?"
+  ] %}
+    <button class="btn btn-outline btn-sm" onclick="askQuick(this.textContent)">
+      {{ q }}
+    </button>
+  {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const messagesDiv = document.getElementById('chatMessages');
+  const input       = document.getElementById('chatInput');
+
+  // Scroll to bottom on load
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+  // Send on Enter key
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+
+  function askQuick(text) {
+    input.value = text;
+    sendMessage();
+  }
+
+  function appendBubble(text, role, meta = '') {
+    const div = document.createElement('div');
+    div.className = `chat-bubble ${role}`;
+    div.innerHTML = `${text}<div class="bubble-meta">${meta}</div>`;
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    return div;
+  }
+
+  function showTyping() {
+    const t = document.createElement('div');
+    t.className = 'typing-indicator';
+    t.id = 'typingIndicator';
+    t.innerHTML = `
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    `;
+    messagesDiv.appendChild(t);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('typingIndicator');
+    if (t) t.remove();
+  }
+
+  async function sendMessage() {
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    // Show user bubble
+    const now = new Date().toTimeString().slice(0,5);
+    appendBubble(msg, 'user', `You · ${now}`);
+    input.value = '';
+
+    // Disable send button
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true;
+
+    // Show typing indicator
+    showTyping();
+
+    try {
+      const res  = await fetch('/chatbot/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+      const data = await res.json();
+      removeTyping();
+
+      const sourceLabel = data.source === 'openai' ? '🤖 MediBot (AI)' : '🤖 MediBot';
+      appendBubble(data.response, 'bot', `${sourceLabel} · ${now}`);
+    } catch(err) {
+      removeTyping();
+      appendBubble('Sorry, I ran into an issue. Please try again. 😕', 'bot', 'MediBot');
+    }
+
+    btn.disabled = false;
+    input.focus();
+  }
+
+  async function clearChat() {
+    if (!confirm('Clear all chat history?')) return;
+    await fetch('/chatbot/clear', { method: 'POST' });
+    // Remove all bubbles except the welcome one
+    const bubbles = messagesDiv.querySelectorAll('.chat-bubble');
+    bubbles.forEach((b, i) => { if (i > 0) b.remove(); });
+  }
+</script>
+{% endblock %}

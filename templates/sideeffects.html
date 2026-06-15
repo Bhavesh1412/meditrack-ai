@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Side Effects – MediTrack AI{% endblock %}
+{% block page_title %}⚠️ Side Effects{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-flex justify-between align-center">
+  <div>
+    <h1>⚠️ Side Effect Tracker</h1>
+    <p>Report and monitor reactions to your medicines</p>
+  </div>
+  <button class="btn btn-warning" onclick="openModal('addSEModal')">
+    + Report Side Effect
+  </button>
+</div>
+
+<!-- ─── STATS ──────────────────────────────────────────────────── -->
+<div class="stats-grid" style="grid-template-columns: repeat(3,1fr); margin-bottom: 24px;">
+  <div class="stat-card">
+    <div class="stat-icon green">😊</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ mild_count }}</div>
+      <div class="stat-label">Mild</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon orange">😐</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ mod_count }}</div>
+      <div class="stat-label">Moderate</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon red">😣</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ sev_count }}</div>
+      <div class="stat-label">Severe</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TABLE ─────────────────────────────────────────────────── -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">📋 All Reported Side Effects</span>
+    <span style="font-size:0.8rem; color:var(--text-muted);">{{ effects|length }} records</span>
+  </div>
+
+  {% if effects %}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Symptom</th>
+            <th>Severity</th>
+            <th>Medicine</th>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in effects %}
+            <tr>
+              <td><strong>{{ e['symptom'] }}</strong></td>
+              <td><span class="badge badge-{{ e['severity'] }}">{{ e['severity'].title() }}</span></td>
+              <td>{{ e['medicine_name'] or '—' }}</td>
+              <td style="font-size:0.8rem; color:var(--text-muted);">{{ e['reported_at'][:10] }}</td>
+              <td style="max-width:200px; font-size:0.82rem; color:var(--text-secondary);">
+                {{ e['description'] or '—' }}
+              </td>
+              <td>
+                <form method="POST"
+                  action="{{ url_for('side_effects.delete', se_id=e['id']) }}"
+                  onsubmit="return confirm('Delete this record?')"
+                  style="display:inline;">
+                  <button class="btn btn-danger btn-sm btn-icon">🗑️</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">😊</div>
+      <h3>No side effects reported</h3>
+      <p>Report any symptoms or reactions you experience from your medications</p>
+    </div>
+  {% endif %}
+</div>
+
+
+<!-- ─── ADD SIDE EFFECT MODAL ─────────────────────────────────── -->
+<div class="modal-backdrop" id="addSEModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">⚠️ Report Side Effect</span>
+      <button class="modal-close" onclick="closeModal('addSEModal')">✕</button>
+    </div>
+    <form method="POST" action="{{ url_for('side_effects.add') }}">
+      <div class="modal-body">
+
+        <div class="form-group">
+          <label class="form-label">Symptom / Reaction *</label>
+          <input type="text" name="symptom" class="form-control"
+            placeholder="e.g., Nausea, Dizziness, Headache" required />
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Severity *</label>
+            <select name="severity" class="form-control" required>
+              <option value="">Select severity</option>
+              <option value="mild">😊 Mild – minor discomfort</option>
+              <option value="moderate">😐 Moderate – affects daily life</option>
+              <option value="severe">😣 Severe – needs attention</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Related Medicine</label>
+            <select name="medicine_id" class="form-control">
+              <option value="">Not linked to a medicine</option>
+              {% for med in medicines %}
+                <option value="{{ med['id'] }}">{{ med['name'] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Date Reported</label>
+          <input type="datetime-local" name="reported_at" class="form-control" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-control"
+            placeholder="Describe your experience in detail..."></textarea>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('addSEModal')">Cancel</button>
+        <button type="submit" class="btn btn-warning">⚠️ Report Effect</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function openModal(id)  { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-backdrop').forEach(b => {
+    b.addEventListener('click', e => { if (e.target === b) b.classList.remove('open'); });
+  });
+
+  // Set default datetime to now
+  const dt = document.querySelector('input[name="reported_at"]');
+  if (dt) dt.value = new Date(Date.now() - new Date().getTimezoneOffset()*60000)
+    .toISOString().slice(0,16);
+</script>
+{% endblock %}
