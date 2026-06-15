@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 💊 MediTrack AI — Medicine Reminder & Side Effect Tracker
 
 > **UN SDG 3: Good Health and Well-Being**
@@ -210,3 +211,6 @@ MediTrack AI is an academic project. The AI chatbot provides **general health in
 ---
 
 *Built with ❤️ for university project submission*
+=======
+# meditrack-ai
+>>>>>>> 779e13e80853943d9687e38cdb5e2b93f9a1df89
