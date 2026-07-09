@@ -4,6 +4,7 @@ chatbot.py (route) - AI Health Assistant routes
 
 from flask import Blueprint, render_template, request, jsonify, session
 from utils.database import get_db_connection
+from utils.i18n import get_lang
 from utils.auth_helpers import login_required
 from utils.chatbot import get_ai_response
 
@@ -52,7 +53,7 @@ def send():
     """, (user_id,)).fetchall()
 
     # Get AI response
-    result = get_ai_response(user_msg, [dict(h) for h in reversed(history)])
+    result = get_ai_response(user_msg, [dict(h) for h in reversed(history)], lang=get_lang())
     bot_reply = result['response']
     source    = result['source']
 

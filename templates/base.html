@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_lang }}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -20,32 +20,32 @@
     <div class="sidebar-logo">
       <div class="logo-icon">💊</div>
       <h2>MediTrack AI</h2>
-      <span>Health Management</span>
+      <span>{{ t('nav_health_management') }}</span>
     </div>
 
     <nav class="sidebar-nav">
-      <div class="nav-section-label">Main</div>
+      <div class="nav-section-label">{{ t('nav_main') }}</div>
       <a href="{{ url_for('dashboard.index') }}" class="{{ 'active' if request.endpoint == 'dashboard.index' }}">
-        <span class="nav-icon">🏠</span> Dashboard
+        <span class="nav-icon">🏠</span> {{ t('nav_dashboard') }}
       </a>
       <a href="{{ url_for('medicines.index') }}" class="{{ 'active' if request.blueprint == 'medicines' }}">
-        <span class="nav-icon">💊</span> Medicines
+        <span class="nav-icon">💊</span> {{ t('nav_medicines') }}
       </a>
       <a href="{{ url_for('reminders.index') }}" class="{{ 'active' if request.blueprint == 'reminders' }}">
-        <span class="nav-icon">⏰</span> Reminders
+        <span class="nav-icon">⏰</span> {{ t('nav_reminders') }}
       </a>
 
-      <div class="nav-section-label">Track</div>
+      <div class="nav-section-label">{{ t('nav_track') }}</div>
       <a href="{{ url_for('side_effects.index') }}" class="{{ 'active' if request.blueprint == 'side_effects' }}">
-        <span class="nav-icon">⚠️</span> Side Effects
+        <span class="nav-icon">⚠️</span> {{ t('nav_side_effects') }}
       </a>
       <a href="{{ url_for('insights.index') }}" class="{{ 'active' if request.blueprint == 'insights' }}">
-        <span class="nav-icon">📊</span> Insights
+        <span class="nav-icon">📊</span> {{ t('nav_insights') }}
       </a>
 
-      <div class="nav-section-label">AI</div>
+      <div class="nav-section-label">{{ t('nav_ai') }}</div>
       <a href="{{ url_for('chatbot.index') }}" class="{{ 'active' if request.blueprint == 'chatbot' }}">
-        <span class="nav-icon">🤖</span> AI Assistant
+        <span class="nav-icon">🤖</span> {{ t('nav_ai_assistant') }}
       </a>
     </nav>
 
@@ -58,7 +58,7 @@
         </div>
       </div>
       <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm w-100">
-        🚪 Logout
+        🚪 {{ t('nav_logout') }}
       </a>
     </div>
   </aside>
@@ -73,6 +73,7 @@
         <span class="topbar-title">{% block page_title %}<span>Medi</span>Track AI{% endblock %}</span>
       </div>
       <div class="topbar-right">
+        {% include 'partials/lang_toggle.html' %}
         <span class="topbar-date" id="currentDate"></span>
       </div>
     </header>
@@ -105,7 +106,7 @@
 <script>
   // ── Display current date in topbar ──────────────────────────────
   document.getElementById('currentDate').textContent =
-    new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+    new Date().toLocaleDateString({{ "'hi-IN'" if current_lang == 'hi' else "'en-US'" }}, { weekday:'short', month:'short', day:'numeric' });
 
   // ── Mobile sidebar toggle ────────────────────────────────────────
   const sidebar  = document.getElementById('sidebar');

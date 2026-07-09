@@ -1,20 +1,19 @@
 {% extends "base.html" %}
-{% block title %}Medicines – MediTrack AI{% endblock %}
-{% block page_title %}💊 Medicines{% endblock %}
+{% block title %}{{ t('nav_medicines') }} – MediTrack AI{% endblock %}
+{% block page_title %}💊 {{ t('nav_medicines') }}{% endblock %}
 
 {% block content %}
 
 <div class="page-header d-flex justify-between align-center">
   <div>
-    <h1>💊 My Medicines</h1>
-    <p>Manage your medication schedule</p>
+    <h1>💊 {{ t('med_page_title') }}</h1>
+    <p>{{ t('med_page_sub') }}</p>
   </div>
   <button class="btn btn-primary" onclick="openModal('addModal')">
-    + Add Medicine
+    + {{ t('add_medicine') }}
   </button>
 </div>
 
-<!-- Medicine Cards -->
 {% if medicines %}
   <div class="medicine-grid">
     {% for med in medicines %}
@@ -25,12 +24,12 @@
             <div class="medicine-dosage">{{ med['dosage'] }}</div>
           </div>
           <span class="badge {{ 'badge-success' if med['is_active'] else 'badge-gray' }}">
-            {{ 'Active' if med['is_active'] else 'Inactive' }}
+            {{ t('active') if med['is_active'] else t('inactive') }}
           </span>
         </div>
 
         <div class="medicine-meta">
-          <span>🔄 {{ med['frequency'] }}</span>
+          <span>🔄 {{ t_freq(med['frequency']) }}</span>
           <span>🕐 {{ med['time'] }}</span>
           <span>📅 {{ med['start_date'] }}</span>
           {% if med['end_date'] %}<span>🏁 {{ med['end_date'] }}</span>{% endif %}
@@ -44,10 +43,10 @@
 
         <div class="medicine-actions">
           <button class="btn btn-outline btn-sm"
-            onclick="loadEditModal({{ med['id'] }})">✏️ Edit</button>
+            onclick="loadEditModal({{ med['id'] }})">✏️ {{ t('edit') }}</button>
           <form method="POST" action="{{ url_for('medicines.delete', med_id=med['id']) }}"
-            onsubmit="return confirm('Remove {{ med['name'] }}?')" style="display:inline;">
-            <button class="btn btn-danger btn-sm">🗑️ Remove</button>
+            onsubmit="return confirm({{ t('confirm_remove', name=med['name'])|tojson }})" style="display:inline;">
+            <button class="btn btn-danger btn-sm">🗑️ {{ t('remove') }}</button>
           </form>
         </div>
       </div>
@@ -57,30 +56,29 @@
   <div class="card">
     <div class="empty-state">
       <div class="empty-icon">💊</div>
-      <h3>No medicines added yet</h3>
-      <p>Click "Add Medicine" to start tracking your medications</p>
+      <h3>{{ t('empty_no_meds') }}</h3>
+      <p>{{ t('empty_click_add') }}</p>
     </div>
   </div>
 {% endif %}
 
 
-<!-- ─── ADD MEDICINE MODAL ─────────────────────────────────────── -->
 <div class="modal-backdrop {{ 'open' if show_modal }}" id="addModal">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">💊 Add New Medicine</span>
+      <span class="modal-title">💊 {{ t('add_new_medicine_modal') }}</span>
       <button class="modal-close" onclick="closeModal('addModal')">✕</button>
     </div>
     <form method="POST" action="{{ url_for('medicines.add') }}">
       <div class="modal-body">
         <div class="form-grid">
           <div class="form-group">
-            <label class="form-label">Medicine Name *</label>
+            <label class="form-label">{{ t('medicine_name') }} *</label>
             <input type="text" name="name" class="form-control"
               placeholder="e.g., Paracetamol" required />
           </div>
           <div class="form-group">
-            <label class="form-label">Dosage *</label>
+            <label class="form-label">{{ t('dosage') }} *</label>
             <input type="text" name="dosage" class="form-control"
               placeholder="e.g., 500mg" required />
           </div>
@@ -88,19 +86,19 @@
 
         <div class="form-grid">
           <div class="form-group">
-            <label class="form-label">Frequency *</label>
+            <label class="form-label">{{ t('frequency') }} *</label>
             <select name="frequency" class="form-control" required>
-              <option value="">Select frequency</option>
-              <option value="Once daily">Once daily</option>
-              <option value="Twice daily">Twice daily</option>
-              <option value="Three times daily">Three times daily</option>
-              <option value="Four times daily">Four times daily</option>
-              <option value="As needed">As needed</option>
-              <option value="Weekly">Weekly</option>
+              <option value="">{{ t('select_frequency') }}</option>
+              <option value="Once daily">{{ t('freq_once_daily') }}</option>
+              <option value="Twice daily">{{ t('freq_twice_daily') }}</option>
+              <option value="Three times daily">{{ t('freq_thrice_daily') }}</option>
+              <option value="Four times daily">{{ t('freq_four_daily') }}</option>
+              <option value="As needed">{{ t('freq_as_needed') }}</option>
+              <option value="Weekly">{{ t('freq_weekly') }}</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Time(s) * <small style="font-weight:400;">(comma-separated)</small></label>
+            <label class="form-label">{{ t('times') }} * <small style="font-weight:400;">{{ t('times_hint') }}</small></label>
             <input type="text" name="time" class="form-control"
               placeholder="e.g., 08:00,20:00" required />
           </div>
@@ -108,84 +106,83 @@
 
         <div class="form-grid">
           <div class="form-group">
-            <label class="form-label">Start Date *</label>
+            <label class="form-label">{{ t('start_date') }} *</label>
             <input type="date" name="start_date" class="form-control" required />
           </div>
           <div class="form-group">
-            <label class="form-label">End Date</label>
+            <label class="form-label">{{ t('end_date') }}</label>
             <input type="date" name="end_date" class="form-control" />
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Notes</label>
+          <label class="form-label">{{ t('notes') }}</label>
           <textarea name="notes" class="form-control"
             placeholder="e.g., Take after meals..."></textarea>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline" onclick="closeModal('addModal')">Cancel</button>
-        <button type="submit" class="btn btn-primary">💊 Add Medicine</button>
+        <button type="button" class="btn btn-outline" onclick="closeModal('addModal')">{{ t('cancel') }}</button>
+        <button type="submit" class="btn btn-primary">💊 {{ t('add_medicine') }}</button>
       </div>
     </form>
   </div>
 </div>
 
 
-<!-- ─── EDIT MEDICINE MODAL ───────────────────────────────────── -->
 <div class="modal-backdrop" id="editModal">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">✏️ Edit Medicine</span>
+      <span class="modal-title">✏️ {{ t('edit_medicine') }}</span>
       <button class="modal-close" onclick="closeModal('editModal')">✕</button>
     </div>
     <form method="POST" id="editForm">
       <div class="modal-body">
         <div class="form-grid">
           <div class="form-group">
-            <label class="form-label">Medicine Name *</label>
+            <label class="form-label">{{ t('medicine_name') }} *</label>
             <input type="text" name="name" id="editName" class="form-control" required />
           </div>
           <div class="form-group">
-            <label class="form-label">Dosage *</label>
+            <label class="form-label">{{ t('dosage') }} *</label>
             <input type="text" name="dosage" id="editDosage" class="form-control" required />
           </div>
         </div>
         <div class="form-grid">
           <div class="form-group">
-            <label class="form-label">Frequency *</label>
+            <label class="form-label">{{ t('frequency') }} *</label>
             <select name="frequency" id="editFrequency" class="form-control" required>
-              <option value="Once daily">Once daily</option>
-              <option value="Twice daily">Twice daily</option>
-              <option value="Three times daily">Three times daily</option>
-              <option value="Four times daily">Four times daily</option>
-              <option value="As needed">As needed</option>
-              <option value="Weekly">Weekly</option>
+              <option value="Once daily">{{ t('freq_once_daily') }}</option>
+              <option value="Twice daily">{{ t('freq_twice_daily') }}</option>
+              <option value="Three times daily">{{ t('freq_thrice_daily') }}</option>
+              <option value="Four times daily">{{ t('freq_four_daily') }}</option>
+              <option value="As needed">{{ t('freq_as_needed') }}</option>
+              <option value="Weekly">{{ t('freq_weekly') }}</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Time(s) *</label>
+            <label class="form-label">{{ t('times') }} *</label>
             <input type="text" name="time" id="editTime" class="form-control" required />
           </div>
         </div>
         <div class="form-grid">
           <div class="form-group">
-            <label class="form-label">Start Date *</label>
+            <label class="form-label">{{ t('start_date') }} *</label>
             <input type="date" name="start_date" id="editStartDate" class="form-control" required />
           </div>
           <div class="form-group">
-            <label class="form-label">End Date</label>
+            <label class="form-label">{{ t('end_date') }}</label>
             <input type="date" name="end_date" id="editEndDate" class="form-control" />
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Notes</label>
+          <label class="form-label">{{ t('notes') }}</label>
           <textarea name="notes" id="editNotes" class="form-control"></textarea>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline" onclick="closeModal('editModal')">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <button type="button" class="btn btn-outline" onclick="closeModal('editModal')">{{ t('cancel') }}</button>
+        <button type="submit" class="btn btn-primary">{{ t('save_changes') }}</button>
       </div>
     </form>
   </div>
@@ -198,12 +195,10 @@
   function openModal(id)  { document.getElementById(id).classList.add('open'); }
   function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-  // Close modal on backdrop click
   document.querySelectorAll('.modal-backdrop').forEach(b => {
     b.addEventListener('click', e => { if (e.target === b) b.classList.remove('open'); });
   });
 
-  // Load medicine data into edit modal via API
   async function loadEditModal(medId) {
     const res  = await fetch(`/medicines/get/${medId}`);
     const data = await res.json();
@@ -218,7 +213,6 @@
     openModal('editModal');
   }
 
-  // Set default start date to today for new medicine form
   document.querySelector('input[name="start_date"]').value =
     new Date().toISOString().split('T')[0];
 </script>

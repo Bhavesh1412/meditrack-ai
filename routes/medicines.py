@@ -6,6 +6,7 @@ Handles: list, add, edit, delete medicines
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from utils.database import get_db_connection
 from utils.auth_helpers import login_required
+from utils.i18n import t
 from datetime import date
 
 medicines_bp = Blueprint('medicines', __name__)
@@ -42,7 +43,7 @@ def add():
 
         # Validation
         if not all([name, dosage, frequency, time, start_date]):
-            flash("Please fill in all required fields.", 'danger')
+            flash(t('err_required_fields'), 'danger')
             return render_template('medicines.html', show_modal=True)
 
         conn = get_db_connection()
@@ -64,7 +65,7 @@ def add():
         conn.commit()
         conn.close()
 
-        flash(f"✅ '{name}' has been added to your medicines.", 'success')
+        flash(t('msg_medicine_added', name=name), 'success')
         return redirect(url_for('medicines.index'))
 
     return redirect(url_for('medicines.index'))
@@ -84,7 +85,7 @@ def edit(med_id):
 
     if not med:
         conn.close()
-        flash("Medicine not found.", 'danger')
+        flash(t('msg_medicine_not_found'), 'danger')
         return redirect(url_for('medicines.index'))
 
     name       = request.form.get('name', '').strip()
@@ -103,7 +104,7 @@ def edit(med_id):
     conn.commit()
     conn.close()
 
-    flash(f"✅ '{name}' updated successfully.", 'success')
+    flash(t('msg_medicine_updated', name=name), 'success')
     return redirect(url_for('medicines.index'))
 
 
@@ -120,7 +121,7 @@ def delete(med_id):
 
     if not med:
         conn.close()
-        flash("Medicine not found.", 'danger')
+        flash(t('msg_medicine_not_found'), 'danger')
         return redirect(url_for('medicines.index'))
 
     # Soft delete — keeps history intact
@@ -131,7 +132,7 @@ def delete(med_id):
     conn.commit()
     conn.close()
 
-    flash(f"🗑️ '{med['name']}' has been removed.", 'info')
+    flash(t('msg_medicine_removed', name=med['name']), 'info')
     return redirect(url_for('medicines.index'))
 
 

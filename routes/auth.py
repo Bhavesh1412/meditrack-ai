@@ -5,6 +5,7 @@ Handles: /register, /login, /logout
 
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from utils.database import get_db_connection
+from utils.i18n import t
 from utils.auth_helpers import hash_password, check_password
 import re
 
@@ -29,16 +30,16 @@ def register():
         errors = []
 
         if not name or len(name) < 2:
-            errors.append("Name must be at least 2 characters.")
+            errors.append(t('err_name_short'))
 
         if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w{2,}$', email):
-            errors.append("Please enter a valid email address.")
+            errors.append(t('err_email_invalid'))
 
         if len(password) < 8:
-            errors.append("Password must be at least 8 characters.")
+            errors.append(t('err_password_short'))
 
         if password != confirm:
-            errors.append("Passwords do not match.")
+            errors.append(t('err_password_mismatch'))
 
         if errors:
             for err in errors:
@@ -53,7 +54,7 @@ def register():
 
         if existing:
             conn.close()
-            flash("An account with this email already exists.", 'danger')
+            flash(t('err_email_exists'), 'danger')
             return render_template('register.html', email=email)
 
         # ── Create new user ───────────────────────────────────────────────────
@@ -65,7 +66,7 @@ def register():
         conn.commit()
         conn.close()
 
-        flash("Account created successfully! Please log in.", 'success')
+        flash(t('msg_account_created'), 'success')
         return redirect(url_for('auth.login'))
 
     return render_template('register.html')
@@ -88,7 +89,7 @@ def login():
         password = request.form.get('password', '')
 
         if not email or not password:
-            flash("Please fill in all fields.", 'danger')
+            flash(t('err_fill_all'), 'danger')
             return render_template('login.html')
 
         # ── Look up user ──────────────────────────────────────────────────────
@@ -99,7 +100,7 @@ def login():
         conn.close()
 
         if not user or not check_password(password, user['password']):
-            flash("Invalid email or password.", 'danger')
+            flash(t('err_invalid_login'), 'danger')
             return render_template('login.html', email=email)
 
         # ── Start session ─────────────────────────────────────────────────────
@@ -108,7 +109,7 @@ def login():
         session['user_name'] = user['name']
         session['user_email'] = user['email']
 
-        flash(f"Welcome back, {user['name']}! 👋", 'success')
+        flash(t('msg_welcome_back', name=user['name']), 'success')
         return redirect(url_for('dashboard.index'))
 
     return render_template('login.html')
@@ -119,5 +120,5 @@ def login():
 def logout():
     """Clear session and redirect to login."""
     session.clear()
-    flash("You've been logged out successfully.", 'info')
+    flash(t('msg_logged_out'), 'info')
     return redirect(url_for('auth.login'))

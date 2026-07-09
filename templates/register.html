@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_lang }}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0b1220" />
-  <title>Register – MediTrack AI</title>
+  <title>{{ t('auth_create_account') }} – MediTrack AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
@@ -14,7 +14,6 @@
 
 <div class="auth-page">
 
-  <!-- Brand panel -->
   <div class="auth-brand">
     <div class="auth-brand-content">
       <div class="auth-brand-logo">
@@ -22,36 +21,38 @@
         <h1>MediTrack AI</h1>
       </div>
       <h2 class="auth-brand-headline">
-        Start your <span>health journey</span> today
+        {{ t('auth_register_headline') }}
       </h2>
       <p class="auth-brand-desc">
-        Join thousands managing their wellness with intelligent reminders, side effect tracking, and personalized AI guidance.
+        {{ t('auth_register_desc') }}
       </p>
     </div>
     <div class="auth-brand-features">
       <div class="auth-feature">
         <span class="auth-feature-icon">🔐</span>
-        Secure, encrypted accounts
+        {{ t('auth_feature_secure') }}
       </div>
       <div class="auth-feature">
         <span class="auth-feature-icon">⏰</span>
-        Never miss a dose again
+        {{ t('auth_feature_never_miss') }}
       </div>
       <div class="auth-feature">
         <span class="auth-feature-icon">⚠️</span>
-        Track reactions in real time
+        {{ t('auth_feature_track') }}
       </div>
     </div>
   </div>
 
-  <!-- Form panel -->
   <div class="auth-panel">
+    <div class="auth-panel-top">
+      {% include 'partials/lang_toggle.html' %}
+    </div>
     <div class="auth-card">
 
       <div class="auth-logo">
         <div class="logo-circle">💊</div>
-        <h1>Create Account</h1>
-        <p>Start managing your health today</p>
+        <h1>{{ t('auth_create_account') }}</h1>
+        <p>{{ t('auth_create_sub') }}</p>
       </div>
 
       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -64,7 +65,7 @@
 
       <form method="POST" action="{{ url_for('auth.register') }}">
         <div class="form-group">
-          <label class="form-label">Full Name</label>
+          <label class="form-label">{{ t('auth_full_name') }}</label>
           <input type="text" name="name" class="form-control"
             placeholder="Jane Doe"
             value="{{ name if name is defined else '' }}"
@@ -72,7 +73,7 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Email Address</label>
+          <label class="form-label">{{ t('auth_email') }}</label>
           <input type="email" name="email" class="form-control"
             placeholder="jane@example.com"
             value="{{ email if email is defined else '' }}"
@@ -80,25 +81,25 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Password</label>
+          <label class="form-label">{{ t('auth_password') }}</label>
           <input type="password" name="password" id="pw"
-            class="form-control" placeholder="At least 8 characters" required />
+            class="form-control" placeholder="••••••••" required />
         </div>
 
         <div class="form-group">
-          <label class="form-label">Confirm Password</label>
+          <label class="form-label">{{ t('auth_confirm_password') }}</label>
           <input type="password" name="confirm_password" id="pw2"
-            class="form-control" placeholder="Repeat password" required />
+            class="form-control" placeholder="••••••••" required />
           <p id="pwMatch" class="form-hint" style="display:none;"></p>
         </div>
 
         <button type="submit" class="btn btn-primary btn-lg w-100 mt-2">
-          Create Account
+          {{ t('auth_create_account') }}
         </button>
       </form>
 
       <div class="auth-footer">
-        Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>
+        {{ t('auth_has_account') }} <a href="{{ url_for('auth.login') }}">{{ t('auth_log_in') }}</a>
       </div>
 
     </div>
@@ -107,6 +108,11 @@
 </div>
 
 <script>
+  const I18N = {
+    pwMatch: {{ t('auth_pw_match')|tojson }},
+    pwNoMatch: {{ t('auth_pw_no_match')|tojson }},
+  };
+
   const pw  = document.getElementById('pw');
   const pw2 = document.getElementById('pw2');
   const msg = document.getElementById('pwMatch');
@@ -115,10 +121,10 @@
     if (pw2.value.length === 0) { msg.style.display = 'none'; return; }
     msg.style.display = 'block';
     if (pw.value === pw2.value) {
-      msg.textContent = '✅ Passwords match';
+      msg.textContent = '✅ ' + I18N.pwMatch;
       msg.className = 'form-hint success';
     } else {
-      msg.textContent = '❌ Passwords do not match';
+      msg.textContent = '❌ ' + I18N.pwNoMatch;
       msg.className = 'form-hint error';
     }
   });

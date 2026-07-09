@@ -1,49 +1,47 @@
 {% extends "base.html" %}
-{% block title %}Side Effects – MediTrack AI{% endblock %}
-{% block page_title %}⚠️ Side Effects{% endblock %}
+{% block title %}{{ t('nav_side_effects') }} – MediTrack AI{% endblock %}
+{% block page_title %}⚠️ {{ t('nav_side_effects') }}{% endblock %}
 
 {% block content %}
 
 <div class="page-header d-flex justify-between align-center">
   <div>
-    <h1>⚠️ Side Effect Tracker</h1>
-    <p>Report and monitor reactions to your medicines</p>
+    <h1>⚠️ {{ t('se_page_title') }}</h1>
+    <p>{{ t('se_page_sub') }}</p>
   </div>
   <button class="btn btn-warning" onclick="openModal('addSEModal')">
-    + Report Side Effect
+    + {{ t('report_side_effect_btn') }}
   </button>
 </div>
 
-<!-- ─── STATS ──────────────────────────────────────────────────── -->
 <div class="stats-grid" style="grid-template-columns: repeat(3,1fr); margin-bottom: 24px;">
   <div class="stat-card">
     <div class="stat-icon green">😊</div>
     <div class="stat-content">
       <div class="stat-value">{{ mild_count }}</div>
-      <div class="stat-label">Mild</div>
+      <div class="stat-label">{{ t('severity_mild') }}</div>
     </div>
   </div>
   <div class="stat-card">
     <div class="stat-icon orange">😐</div>
     <div class="stat-content">
       <div class="stat-value">{{ mod_count }}</div>
-      <div class="stat-label">Moderate</div>
+      <div class="stat-label">{{ t('severity_moderate') }}</div>
     </div>
   </div>
   <div class="stat-card">
     <div class="stat-icon red">😣</div>
     <div class="stat-content">
       <div class="stat-value">{{ sev_count }}</div>
-      <div class="stat-label">Severe</div>
+      <div class="stat-label">{{ t('severity_severe') }}</div>
     </div>
   </div>
 </div>
 
-<!-- ─── TABLE ─────────────────────────────────────────────────── -->
 <div class="card">
   <div class="card-header">
-    <span class="card-title">📋 All Reported Side Effects</span>
-    <span style="font-size:0.8rem; color:var(--text-muted);">{{ effects|length }} records</span>
+    <span class="card-title">📋 {{ t('all_reported') }}</span>
+    <span style="font-size:0.8rem; color:var(--text-muted);">{{ effects|length }} {{ t('records') }}</span>
   </div>
 
   {% if effects %}
@@ -51,19 +49,19 @@
       <table>
         <thead>
           <tr>
-            <th>Symptom</th>
-            <th>Severity</th>
-            <th>Medicine</th>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Action</th>
+            <th>{{ t('symptom') }}</th>
+            <th>{{ t('severity') }}</th>
+            <th>{{ t('medicine') }}</th>
+            <th>{{ t('date') }}</th>
+            <th>{{ t('description') }}</th>
+            <th>{{ t('action') }}</th>
           </tr>
         </thead>
         <tbody>
           {% for e in effects %}
             <tr>
               <td><strong>{{ e['symptom'] }}</strong></td>
-              <td><span class="badge badge-{{ e['severity'] }}">{{ e['severity'].title() }}</span></td>
+              <td><span class="badge badge-{{ e['severity'] }}">{{ t_severity(e['severity']) }}</span></td>
               <td>{{ e['medicine_name'] or '—' }}</td>
               <td style="font-size:0.8rem; color:var(--text-muted);">{{ e['reported_at'][:10] }}</td>
               <td style="max-width:200px; font-size:0.82rem; color:var(--text-secondary);">
@@ -72,7 +70,7 @@
               <td>
                 <form method="POST"
                   action="{{ url_for('side_effects.delete', se_id=e['id']) }}"
-                  onsubmit="return confirm('Delete this record?')"
+                  onsubmit="return confirm({{ t('confirm_delete_se')|tojson }})"
                   style="display:inline;">
                   <button class="btn btn-danger btn-sm btn-icon">🗑️</button>
                 </form>
@@ -85,43 +83,42 @@
   {% else %}
     <div class="empty-state">
       <div class="empty-icon">😊</div>
-      <h3>No side effects reported</h3>
-      <p>Report any symptoms or reactions you experience from your medications</p>
+      <h3>{{ t('empty_no_side_effects') }}</h3>
+      <p>{{ t('empty_se_detail') }}</p>
     </div>
   {% endif %}
 </div>
 
 
-<!-- ─── ADD SIDE EFFECT MODAL ─────────────────────────────────── -->
 <div class="modal-backdrop" id="addSEModal">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">⚠️ Report Side Effect</span>
+      <span class="modal-title">⚠️ {{ t('report_modal_title') }}</span>
       <button class="modal-close" onclick="closeModal('addSEModal')">✕</button>
     </div>
     <form method="POST" action="{{ url_for('side_effects.add') }}">
       <div class="modal-body">
 
         <div class="form-group">
-          <label class="form-label">Symptom / Reaction *</label>
+          <label class="form-label">{{ t('symptom_reaction') }} *</label>
           <input type="text" name="symptom" class="form-control"
             placeholder="e.g., Nausea, Dizziness, Headache" required />
         </div>
 
         <div class="form-grid">
           <div class="form-group">
-            <label class="form-label">Severity *</label>
+            <label class="form-label">{{ t('severity') }} *</label>
             <select name="severity" class="form-control" required>
-              <option value="">Select severity</option>
-              <option value="mild">😊 Mild – minor discomfort</option>
-              <option value="moderate">😐 Moderate – affects daily life</option>
-              <option value="severe">😣 Severe – needs attention</option>
+              <option value="">{{ t('select_severity') }}</option>
+              <option value="mild">😊 {{ t('sev_mild_opt') }}</option>
+              <option value="moderate">😐 {{ t('sev_mod_opt') }}</option>
+              <option value="severe">😣 {{ t('sev_sev_opt') }}</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Related Medicine</label>
+            <label class="form-label">{{ t('related_medicine') }}</label>
             <select name="medicine_id" class="form-control">
-              <option value="">Not linked to a medicine</option>
+              <option value="">{{ t('not_linked') }}</option>
               {% for med in medicines %}
                 <option value="{{ med['id'] }}">{{ med['name'] }}</option>
               {% endfor %}
@@ -130,20 +127,20 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Date Reported</label>
+          <label class="form-label">{{ t('date_reported') }}</label>
           <input type="datetime-local" name="reported_at" class="form-control" />
         </div>
 
         <div class="form-group">
-          <label class="form-label">Description</label>
+          <label class="form-label">{{ t('description') }}</label>
           <textarea name="description" class="form-control"
             placeholder="Describe your experience in detail..."></textarea>
         </div>
 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline" onclick="closeModal('addSEModal')">Cancel</button>
-        <button type="submit" class="btn btn-warning">⚠️ Report Effect</button>
+        <button type="button" class="btn btn-outline" onclick="closeModal('addSEModal')">{{ t('cancel') }}</button>
+        <button type="submit" class="btn btn-warning">⚠️ {{ t('report_effect') }}</button>
       </div>
     </form>
   </div>
@@ -159,7 +156,6 @@
     b.addEventListener('click', e => { if (e.target === b) b.classList.remove('open'); });
   });
 
-  // Set default datetime to now
   const dt = document.querySelector('input[name="reported_at"]');
   if (dt) dt.value = new Date(Date.now() - new Date().getTimezoneOffset()*60000)
     .toISOString().slice(0,16);

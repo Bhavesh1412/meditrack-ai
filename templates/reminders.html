@@ -1,45 +1,43 @@
 {% extends "base.html" %}
-{% block title %}Reminders – MediTrack AI{% endblock %}
-{% block page_title %}⏰ Reminders{% endblock %}
+{% block title %}{{ t('nav_reminders') }} – MediTrack AI{% endblock %}
+{% block page_title %}⏰ {{ t('nav_reminders') }}{% endblock %}
 
 {% block content %}
 
 <div class="page-header">
-  <h1>⏰ Reminders & Tracking</h1>
-  <p>Mark doses as taken or missed · Today: {{ today }}</p>
+  <h1>⏰ {{ t('rem_page_title') }}</h1>
+  <p>{{ t('rem_page_sub', today=today) }}</p>
 </div>
 
-<!-- ─── ADHERENCE OVERVIEW ─────────────────────────────────────── -->
 <div class="stats-grid" style="grid-template-columns: repeat(3,1fr); margin-bottom: 24px;">
   <div class="stat-card">
     <div class="stat-icon green">✅</div>
     <div class="stat-content">
       <div class="stat-value">{{ total_taken }}</div>
-      <div class="stat-label">Taken (30 days)</div>
+      <div class="stat-label">{{ t('stat_taken_30d') }}</div>
     </div>
   </div>
   <div class="stat-card">
     <div class="stat-icon red">❌</div>
     <div class="stat-content">
       <div class="stat-value">{{ total_missed }}</div>
-      <div class="stat-label">Missed (30 days)</div>
+      <div class="stat-label">{{ t('stat_missed_30d') }}</div>
     </div>
   </div>
   <div class="stat-card">
     <div class="stat-icon purple">📈</div>
     <div class="stat-content">
       <div class="stat-value">{{ adherence_pct }}%</div>
-      <div class="stat-label">Adherence Rate</div>
+      <div class="stat-label">{{ t('stat_adherence') }}</div>
     </div>
   </div>
 </div>
 
 <div class="grid-2">
 
-  <!-- Active Reminders -->
   <div class="card">
     <div class="card-header">
-      <span class="card-title">💊 Today's Schedule</span>
+      <span class="card-title">💊 {{ t('today_schedule') }}</span>
     </div>
 
     {% if reminders %}
@@ -48,16 +46,16 @@
           <div class="reminder-time">{{ r['reminder_time'] }}</div>
           <div class="reminder-info">
             <div class="med-name">{{ r['medicine_name'] }}</div>
-            <div class="med-dose">{{ r['dosage'] }} · {{ r['frequency'] }}</div>
+            <div class="med-dose">{{ r['dosage'] }} · {{ t_freq(r['frequency']) }}</div>
           </div>
           <div class="reminder-actions">
             <button class="btn btn-success btn-sm"
               onclick="markDose({{ r['medicine_id'] }}, 'taken', '{{ r['reminder_time'] }}', this)">
-              ✅ Taken
+              ✅ {{ t('status_taken') }}
             </button>
             <button class="btn btn-danger btn-sm"
               onclick="markDose({{ r['medicine_id'] }}, 'missed', '{{ r['reminder_time'] }}', this)">
-              ❌ Missed
+              ❌ {{ t('status_missed') }}
             </button>
           </div>
         </div>
@@ -65,16 +63,15 @@
     {% else %}
       <div class="empty-state">
         <div class="empty-icon">⏰</div>
-        <h3>No reminders for now</h3>
-        <p>Add medicines to generate reminders automatically</p>
+        <h3>{{ t('empty_no_reminders_now') }}</h3>
+        <p>{{ t('empty_add_for_reminders') }}</p>
       </div>
     {% endif %}
   </div>
 
-  <!-- Today's Log -->
   <div class="card">
     <div class="card-header">
-      <span class="card-title">📋 Today's Log</span>
+      <span class="card-title">📋 {{ t('today_log') }}</span>
     </div>
 
     {% if today_history %}
@@ -82,9 +79,9 @@
         <table>
           <thead>
             <tr>
-              <th>Medicine</th>
-              <th>Status</th>
-              <th>Time</th>
+              <th>{{ t('medicine') }}</th>
+              <th>{{ t('status') }}</th>
+              <th>{{ t('time') }}</th>
             </tr>
           </thead>
           <tbody id="todayLog">
@@ -93,7 +90,7 @@
                 <td><strong>{{ h['medicine_name'] }}</strong><br>
                   <small style="color:var(--text-muted)">{{ h['dosage'] }}</small>
                 </td>
-                <td><span class="badge badge-{{ h['status'] }}">{{ h['status'].title() }}</span></td>
+                <td><span class="badge badge-{{ h['status'] }}">{{ t_status(h['status']) }}</span></td>
                 <td style="color:var(--text-muted); font-size:0.8rem;">{{ h['taken_at'][11:16] }}</td>
               </tr>
             {% endfor %}
@@ -103,15 +100,14 @@
     {% else %}
       <div class="empty-state" id="logEmpty">
         <div class="empty-icon">📋</div>
-        <h3>No doses logged today</h3>
-        <p>Mark doses as taken or missed to track here</p>
+        <h3>{{ t('empty_no_doses_today') }}</h3>
+        <p>{{ t('empty_mark_doses') }}</p>
       </div>
     {% endif %}
   </div>
 
 </div>
 
-<!-- Toast notification -->
 <div id="toast" style="
   position: fixed; bottom: 24px; right: 24px;
   background: var(--text-primary); color: #fff;
@@ -119,23 +115,27 @@
   font-size: 0.875rem; font-weight: 600;
   box-shadow: 0 8px 24px rgba(0,0,0,0.2);
   display: none; z-index: 999;
-  animation: slideUp 0.3s ease;
 "></div>
 
 {% endblock %}
 
 {% block extra_js %}
 <script>
+  const I18N = {
+    statusTaken: {{ t('status_taken')|tojson }},
+    statusMissed: {{ t('status_missed')|tojson }},
+    toastError: {{ t('toast_error')|tojson }},
+  };
+
   function showToast(msg, color = '#22c55e') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.style.background = color;
-    t.style.display = 'block';
-    setTimeout(() => t.style.display = 'none', 2500);
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.style.background = color;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 2500);
   }
 
   async function markDose(medicineId, status, scheduledTime, btn) {
-    // Disable buttons to prevent double-click
     const row = btn.closest('.reminder-item');
     row.querySelectorAll('button').forEach(b => b.disabled = true);
 
@@ -152,33 +152,31 @@
       const color = status === 'taken' ? '#22c55e' : '#ef4444';
       showToast(`${icon} ${data.message}`, color);
 
-      // Visual feedback — fade the row
       row.style.transition = 'opacity 0.4s';
       row.style.opacity = '0.4';
 
-      // Add to log table dynamically
       const now = new Date().toTimeString().slice(0, 5);
       const tbody = document.getElementById('todayLog');
       const logEmpty = document.getElementById('logEmpty');
       if (logEmpty) logEmpty.style.display = 'none';
 
       if (!tbody) {
-        // If table didn't exist yet, reload
         setTimeout(() => location.reload(), 1200);
         return;
       }
 
       const medName = row.querySelector('.med-name').textContent;
       const medDose = row.querySelector('.med-dose').textContent;
+      const statusLabel = status === 'taken' ? I18N.statusTaken : I18N.statusMissed;
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><strong>${medName}</strong><br><small style="color:var(--text-muted)">${medDose.split(' · ')[0]}</small></td>
-        <td><span class="badge badge-${status}">${status.charAt(0).toUpperCase()+status.slice(1)}</span></td>
+        <td><span class="badge badge-${status}">${statusLabel}</span></td>
         <td style="color:var(--text-muted); font-size:0.8rem;">${now}</td>
       `;
       tbody.insertBefore(tr, tbody.firstChild);
     } else {
-      showToast('Something went wrong. Try again.', '#ef4444');
+      showToast(I18N.toastError, '#ef4444');
       row.querySelectorAll('button').forEach(b => b.disabled = false);
     }
   }

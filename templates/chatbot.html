@@ -1,50 +1,42 @@
 {% extends "base.html" %}
-{% block title %}AI Assistant – MediTrack AI{% endblock %}
-{% block page_title %}🤖 AI Assistant{% endblock %}
+{% block title %}{{ t('chat_title') }} – MediTrack AI{% endblock %}
+{% block page_title %}🤖 {{ t('nav_ai_assistant') }}{% endblock %}
 
 {% block content %}
 
 <div class="page-header d-flex justify-between align-center">
   <div>
-    <h1>🤖 AI Health Assistant</h1>
-    <p>Ask MediBot about medications, side effects, and general health</p>
+    <h1>🤖 {{ t('chat_title') }}</h1>
+    <p>{{ t('chat_sub') }}</p>
   </div>
-  <button class="btn btn-outline btn-sm" onclick="clearChat()">🗑️ Clear Chat</button>
+  <button class="btn btn-outline btn-sm" onclick="clearChat()">🗑️ {{ t('clear_chat') }}</button>
 </div>
 
-<!-- Disclaimer -->
 <div class="chat-disclaimer">
-  ⚠️ <strong>Disclaimer:</strong> MediBot provides general health information only.
-  This chatbot does <strong>not</strong> replace professional medical advice.
-  Always consult a qualified healthcare provider for medical decisions.
+  ⚠️ <strong>{{ t('chat_disclaimer') }}</strong>
 </div>
 
-<!-- Chat Container -->
 <div class="card card-flush">
   <div class="chat-container">
-
-    <!-- Messages area -->
     <div class="chat-messages" id="chatMessages">
 
-      <!-- Welcome message -->
       <div class="chat-bubble bot">
-        <div>👋 Hi! I'm <strong>MediBot</strong>, your AI health assistant.</div>
-        <div style="margin-top: 8px;">I can help with:</div>
+        <div>👋 {{ t('chat_welcome') }}</div>
+        <div style="margin-top: 8px;">{{ t('chat_can_help') }}</div>
         <ul style="margin: 6px 0 0 16px; font-size: 0.85rem;">
-          <li>💊 Medication questions</li>
-          <li>⚠️ Side effect information</li>
-          <li>📅 Dosage and timing advice</li>
-          <li>🏥 General health guidance</li>
+          <li>💊 {{ t('chat_help_meds') }}</li>
+          <li>⚠️ {{ t('chat_help_se') }}</li>
+          <li>📅 {{ t('chat_help_dose') }}</li>
+          <li>🏥 {{ t('chat_help_health') }}</li>
         </ul>
-        <div class="bubble-meta">MediBot · AI Assistant</div>
+        <div class="bubble-meta">{{ t('medibot') }} · {{ t('ai_assistant') }}</div>
       </div>
 
-      <!-- Previous chat history from DB -->
       {% for msg in history %}
         <div class="chat-bubble {{ msg['role'] == 'user' and 'user' or 'bot' }}">
           {{ msg['message'] }}
           <div class="bubble-meta">
-            {{ 'You' if msg['role'] == 'user' else 'MediBot' }} ·
+            {{ t('you') if msg['role'] == 'user' else t('medibot') }} ·
             {{ msg['created_at'][11:16] }}
           </div>
         </div>
@@ -52,36 +44,27 @@
 
     </div>
 
-    <!-- Input area -->
     <div class="chat-input-area">
       <input
         type="text"
         class="chat-input"
         id="chatInput"
-        placeholder="Ask about your medicines, side effects, dosage..."
+        placeholder="{{ t('chat_placeholder') }}"
         maxlength="500"
         autocomplete="off"
       />
-      <button class="chat-send-btn" id="sendBtn" onclick="sendMessage()" title="Send">
+      <button class="chat-send-btn" id="sendBtn" onclick="sendMessage()" title="{{ t('send') }}">
         ➤
       </button>
     </div>
-
   </div>
 </div>
 
-<!-- Quick question chips -->
 <div class="quick-chips">
-  <span class="quick-chips-label">Try asking:</span>
-  {% for q in [
-    "What are common side effects of ibuprofen?",
-    "What should I do if I missed a dose?",
-    "How does paracetamol work?",
-    "What is the maximum daily dose of paracetamol?",
-    "Can I take antibiotics with food?"
-  ] %}
+  <span class="quick-chips-label">{{ t('try_asking') }}</span>
+  {% for key in ['quick_q1', 'quick_q2', 'quick_q3', 'quick_q4', 'quick_q5'] %}
     <button class="btn btn-outline btn-sm" onclick="askQuick(this.textContent)">
-      {{ q }}
+      {{ t(key) }}
     </button>
   {% endfor %}
 </div>
@@ -90,13 +73,19 @@
 
 {% block extra_js %}
 <script>
+  const I18N = {
+    you: {{ t('you')|tojson }},
+    medibot: {{ t('medibot')|tojson }},
+    medibotAi: {{ t('medibot_ai')|tojson }},
+    chatError: {{ t('chat_error')|tojson }},
+    confirmClear: {{ t('confirm_clear_chat')|tojson }},
+  };
+
   const messagesDiv = document.getElementById('chatMessages');
   const input       = document.getElementById('chatInput');
 
-  // Scroll to bottom on load
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-  // Send on Enter key
   input.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
@@ -129,24 +118,20 @@
   }
 
   function removeTyping() {
-    const t = document.getElementById('typingIndicator');
-    if (t) t.remove();
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
   }
 
   async function sendMessage() {
     const msg = input.value.trim();
     if (!msg) return;
 
-    // Show user bubble
     const now = new Date().toTimeString().slice(0,5);
-    appendBubble(msg, 'user', `You · ${now}`);
+    appendBubble(msg, 'user', `${I18N.you} · ${now}`);
     input.value = '';
 
-    // Disable send button
     const btn = document.getElementById('sendBtn');
     btn.disabled = true;
-
-    // Show typing indicator
     showTyping();
 
     try {
@@ -158,11 +143,11 @@
       const data = await res.json();
       removeTyping();
 
-      const sourceLabel = data.source === 'openai' ? '🤖 MediBot (AI)' : '🤖 MediBot';
+      const sourceLabel = data.source === 'openai' ? I18N.medibotAi : I18N.medibot;
       appendBubble(data.response, 'bot', `${sourceLabel} · ${now}`);
     } catch(err) {
       removeTyping();
-      appendBubble('Sorry, I ran into an issue. Please try again. 😕', 'bot', 'MediBot');
+      appendBubble(I18N.chatError, 'bot', I18N.medibot);
     }
 
     btn.disabled = false;
@@ -170,9 +155,8 @@
   }
 
   async function clearChat() {
-    if (!confirm('Clear all chat history?')) return;
+    if (!confirm(I18N.confirmClear)) return;
     await fetch('/chatbot/clear', { method: 'POST' });
-    // Remove all bubbles except the welcome one
     const bubbles = messagesDiv.querySelectorAll('.chat-bubble');
     bubbles.forEach((b, i) => { if (i > 0) b.remove(); });
   }

@@ -5,6 +5,7 @@ side_effects.py - Side Effect Tracker routes
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from utils.database import get_db_connection
 from utils.auth_helpers import login_required
+from utils.i18n import t
 
 side_effects_bp = Blueprint('side_effects', __name__)
 
@@ -59,7 +60,7 @@ def add():
     reported_at = request.form.get('reported_at', '').strip() or None
 
     if not symptom or severity not in ('mild', 'moderate', 'severe'):
-        flash("Please fill in all required fields.", 'danger')
+        flash(t('err_required_fields'), 'danger')
         return redirect(url_for('side_effects.index'))
 
     conn = get_db_connection()
@@ -77,7 +78,7 @@ def add():
     conn.commit()
     conn.close()
 
-    flash(f"✅ Side effect '{symptom}' reported.", 'success')
+    flash(t('msg_side_effect_reported', symptom=symptom), 'success')
     return redirect(url_for('side_effects.index'))
 
 
@@ -92,5 +93,5 @@ def delete(se_id):
     )
     conn.commit()
     conn.close()
-    flash("Side effect record deleted.", 'info')
+    flash(t('msg_side_effect_deleted'), 'info')
     return redirect(url_for('side_effects.index'))

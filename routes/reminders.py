@@ -6,6 +6,7 @@ Handles marking medicines as taken/missed and showing history
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from utils.database import get_db_connection
 from utils.auth_helpers import login_required
+from utils.i18n import t, t_status
 from datetime import date, datetime
 
 reminders_bp = Blueprint('reminders', __name__)
@@ -105,7 +106,10 @@ def mark():
     conn.commit()
     conn.close()
 
-    return jsonify({'success': True, 'message': f'Marked as {status}!'})
+    return jsonify({
+        'success': True,
+        'message': t('msg_marked_as', status=t_status(status))
+    })
 
 
 @reminders_bp.route('/reminders/history')

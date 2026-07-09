@@ -1,68 +1,64 @@
 {% extends "base.html" %}
-{% block title %}Dashboard – MediTrack AI{% endblock %}
+{% block title %}{{ t('nav_dashboard') }} – MediTrack AI{% endblock %}
 {% block page_title %}<span>Medi</span>Track AI{% endblock %}
 
 {% block content %}
 
 <div class="page-header">
-  <h1>👋 Welcome back, {{ user_name }}!</h1>
-  <p>Here's your health overview for today — {{ today }}</p>
+  <h1>{{ t('dash_welcome', name=user_name) }}</h1>
+  <p>{{ t('dash_subtitle', today=today) }}</p>
 </div>
 
-<!-- ─── STAT CARDS ─────────────────────────────────────────────── -->
 <div class="stats-grid">
   <div class="stat-card">
     <div class="stat-icon blue">💊</div>
     <div class="stat-content">
       <div class="stat-value">{{ total_medicines }}</div>
-      <div class="stat-label">Active Medicines</div>
+      <div class="stat-label">{{ t('stat_active_medicines') }}</div>
     </div>
   </div>
   <div class="stat-card">
     <div class="stat-icon green">✅</div>
     <div class="stat-content">
       <div class="stat-value">{{ taken_count }}</div>
-      <div class="stat-label">Taken (7 days)</div>
+      <div class="stat-label">{{ t('stat_taken_7d') }}</div>
     </div>
   </div>
   <div class="stat-card">
     <div class="stat-icon red">❌</div>
     <div class="stat-content">
       <div class="stat-value">{{ missed_count }}</div>
-      <div class="stat-label">Missed (7 days)</div>
+      <div class="stat-label">{{ t('stat_missed_7d') }}</div>
     </div>
   </div>
   <div class="stat-card">
     <div class="stat-icon purple">📈</div>
     <div class="stat-content">
       <div class="stat-value">{{ adherence }}%</div>
-      <div class="stat-label">Adherence Rate</div>
+      <div class="stat-label">{{ t('stat_adherence') }}</div>
     </div>
   </div>
 </div>
 
-<!-- ─── ADHERENCE PROGRESS ────────────────────────────────────── -->
 <div class="card mb-3">
   <div class="card-header">
-    <span class="card-title">📈 Weekly Adherence</span>
-    <a href="{{ url_for('insights.index') }}" class="btn btn-outline btn-sm">Full Report</a>
+    <span class="card-title">📈 {{ t('weekly_adherence') }}</span>
+    <a href="{{ url_for('insights.index') }}" class="btn btn-outline btn-sm">{{ t('full_report') }}</a>
   </div>
   <div class="adherence-text">
-    {{ adherence }}% — {{ taken_count }} taken out of {{ taken_count + missed_count }} scheduled doses
+    {{ t('adherence_summary', pct=adherence, taken=taken_count, total=taken_count + missed_count) }}
   </div>
   <div class="progress-bar-wrapper">
     <div class="progress-bar" style="width: {{ adherence }}%"></div>
   </div>
 </div>
 
-<!-- ─── MAIN GRID ─────────────────────────────────────────────── -->
 <div class="grid-2">
 
-  <!-- Today's Medicines -->
   <div class="card">
     <div class="card-header">
-      <span class="card-title">💊 Today's Medicines</span>
-      <a href="{{ url_for('medicines.index') }}" class="btn btn-primary btn-sm">+ Add</a>
+      <span class="card-title">💊 {{ t('today_medicines') }}</span>
+      <a href="{{ url_for('medicines.index') }}" class="btn btn-primary btn-sm">+ {{ t('add') }}</a>
     </div>
 
     {% if today_medicines %}
@@ -71,25 +67,24 @@
           <div class="reminder-time">{{ med['time'].split(',')[0] }}</div>
           <div class="reminder-info">
             <div class="med-name">{{ med['name'] }}</div>
-            <div class="med-dose">{{ med['dosage'] }} · {{ med['frequency'] }}</div>
+            <div class="med-dose">{{ med['dosage'] }} · {{ t_freq(med['frequency']) }}</div>
           </div>
-          <span class="badge badge-info">Active</span>
+          <span class="badge badge-info">{{ t('active') }}</span>
         </div>
       {% endfor %}
     {% else %}
       <div class="empty-state">
         <div class="empty-icon">💊</div>
-        <h3>No medicines yet</h3>
-        <p>Add your first medicine to get started</p>
+        <h3>{{ t('empty_no_medicines') }}</h3>
+        <p>{{ t('empty_add_first_med') }}</p>
       </div>
     {% endif %}
   </div>
 
-  <!-- Upcoming Reminders -->
   <div class="card">
     <div class="card-header">
-      <span class="card-title">⏰ Upcoming Reminders</span>
-      <a href="{{ url_for('reminders.index') }}" class="btn btn-outline btn-sm">All</a>
+      <span class="card-title">⏰ {{ t('upcoming_reminders') }}</span>
+      <a href="{{ url_for('reminders.index') }}" class="btn btn-outline btn-sm">{{ t('all') }}</a>
     </div>
 
     {% if reminders %}
@@ -105,17 +100,16 @@
     {% else %}
       <div class="empty-state">
         <div class="empty-icon">⏰</div>
-        <h3>No upcoming reminders</h3>
-        <p>Reminders are created automatically when you add medicines</p>
+        <h3>{{ t('empty_no_reminders') }}</h3>
+        <p>{{ t('empty_reminders_auto') }}</p>
       </div>
     {% endif %}
   </div>
 
-  <!-- Recent Side Effects -->
   <div class="card">
     <div class="card-header">
-      <span class="card-title">⚠️ Recent Side Effects</span>
-      <a href="{{ url_for('side_effects.index') }}" class="btn btn-outline btn-sm">All</a>
+      <span class="card-title">⚠️ {{ t('recent_side_effects') }}</span>
+      <a href="{{ url_for('side_effects.index') }}" class="btn btn-outline btn-sm">{{ t('all') }}</a>
     </div>
 
     {% if side_effects %}
@@ -123,37 +117,36 @@
         <div class="reminder-item">
           <div class="reminder-info">
             <div class="med-name">{{ se['symptom'] }}</div>
-            <div class="med-dose">{{ se['medicine_name'] or 'General' }} · {{ se['reported_at'][:10] }}</div>
+            <div class="med-dose">{{ se['medicine_name'] or t('general') }} · {{ se['reported_at'][:10] }}</div>
           </div>
-          <span class="badge badge-{{ se['severity'] }}">{{ se['severity'].title() }}</span>
+          <span class="badge badge-{{ se['severity'] }}">{{ t_severity(se['severity']) }}</span>
         </div>
       {% endfor %}
     {% else %}
       <div class="empty-state">
         <div class="empty-icon">😊</div>
-        <h3>No side effects reported</h3>
-        <p>Track any reactions you experience</p>
+        <h3>{{ t('empty_no_side_effects') }}</h3>
+        <p>{{ t('empty_track_reactions') }}</p>
       </div>
     {% endif %}
   </div>
 
-  <!-- Quick Actions -->
   <div class="card">
     <div class="card-header">
-      <span class="card-title">⚡ Quick Actions</span>
+      <span class="card-title">⚡ {{ t('quick_actions') }}</span>
     </div>
     <div class="quick-actions">
       <a href="{{ url_for('medicines.index') }}" class="btn btn-primary">
-        💊 Add New Medicine
+        💊 {{ t('add_new_medicine') }}
       </a>
       <a href="{{ url_for('side_effects.index') }}" class="btn btn-warning">
-        ⚠️ Report Side Effect
+        ⚠️ {{ t('report_side_effect') }}
       </a>
       <a href="{{ url_for('chatbot.index') }}" class="btn btn-outline">
-        🤖 Ask AI Assistant
+        🤖 {{ t('ask_ai') }}
       </a>
       <a href="{{ url_for('insights.index') }}" class="btn btn-outline">
-        📊 View Insights
+        📊 {{ t('view_insights') }}
       </a>
     </div>
   </div>

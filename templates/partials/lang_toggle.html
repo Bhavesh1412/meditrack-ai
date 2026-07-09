@@ -1,0 +1,6 @@
+<div class="lang-toggle" role="group" aria-label="Language">
+  <a href="{{ url_for('language.set_language', lang='en') }}"
+     class="lang-btn {{ 'active' if current_lang == 'en' }}">EN</a>
+  <a href="{{ url_for('language.set_language', lang='hi') }}"
+     class="lang-btn {{ 'active' if current_lang == 'hi' }}">हिं</a>
+</div>

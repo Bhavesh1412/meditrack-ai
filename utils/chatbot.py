@@ -119,24 +119,73 @@ DEFAULT_RESPONSE = (
 )
 
 
-def get_fallback_response(user_message: str) -> str:
+def get_system_prompt(lang: str = 'en') -> str:
+    prompt = SYSTEM_PROMPT.strip()
+    if lang == 'hi':
+        prompt += (
+            "\n\nIMPORTANT: Respond entirely in Hindi using Devanagari script. "
+            "Keep medicine names in common form. "
+            "Always include this disclaimer in Hindi: यह केवल सामान्य जानकारी है, चिकित्सा सलाह नहीं।"
+        )
+    return prompt
+
+
+# Hindi fallback responses (same keyword triggers)
+FALLBACK_RESPONSES_HI = [
+    (
+        ['side effect', 'side effects', 'reaction', 'adverse', 'dushprabhav', 'प्रभाव'],
+        "दुष्प्रभाव दवा के अनुसार अलग होते हैं। सामान्य में मितली, चक्कर, सिरदर्द या थकान शामिल हैं। "
+        "दवा की पर्ची पढ़ें और गंभीर प्रतिक्रिया पर तुरंत डॉक्टर को बताएँ। 🩺"
+    ),
+    (
+        ['miss', 'missed', 'forgot', 'skip', 'skipped', 'bhool', 'chhod'],
+        "अगर खुराक छूट गई हो तो याद आते ही लें — जब तक अगली खुराक का समय न हो। "
+        "कभी दोहरी खुराक न लें। MediTrack में रिमाइंडर सेट करें! ⏰"
+    ),
+    (
+        ['dosage', 'dose', 'how much', 'khurak', 'खुराक'],
+        "खुराक विशिष्ट दवा और डॉक्टर के नुस्खे पर निर्भर करती है। "
+        "हमेशा निर्धारित मात्रा लें। बिना डॉक्टर की सलाह के खुराक न बदलें। 💊"
+    ),
+    (
+        ['hello', 'hi', 'hey', 'namaste', 'नमस्ते'],
+        "नमस्ते! 👋 मैं मेडीबॉट, आपका AI स्वास्थ्य सहायक हूँ। "
+        "दवा, दुष्प्रभाव और सामान्य स्वास्थ्य मार्गदर्शन में मदद कर सकता हूँ। "
+        "आज क्या जानना चाहेंगे?"
+    ),
+    (
+        ['thank', 'thanks', 'dhanyavad', 'धन्यवाद'],
+        "आपका स्वागत है! 😊 गंभीर स्वास्थ्य चिंताओं के लिए हमेशा योग्य डॉक्टर से परामर्श लें। स्वस्थ रहें!"
+    ),
+    (
+        ['help', 'madad', 'मदद'],
+        "मैं मदद कर सकता हूँ: 💊 दवा जानकारी, ⚠️ दुष्प्रभाव, 📅 खुराक समय, 🏥 सामान्य स्वास्थ्य मार्गदर्शन। बस पूछें!"
+    ),
+]
+
+DEFAULT_RESPONSE_HI = (
+    "यह एक अच्छा स्वास्थ्य प्रश्न है! सटीक और व्यक्तिगत सलाह के लिए "
+    "डॉक्टर या फार्मासिस्ट से परामर्श करें। मैं दवाओं और कल्याण की सामान्य जानकारी देने के लिए यहाँ हूँ। "
+    "और क्या मदद करूँ? 😊"
+)
+
+
+def get_fallback_response(user_message: str, lang: str = 'en') -> str:
     """
     Local keyword-based response system.
     Scans the user's message for known health keywords and returns a response.
-
-    This is the fallback when OpenAI API is unavailable.
     """
     message_lower = user_message.lower()
+    responses = FALLBACK_RESPONSES_HI if lang == 'hi' else FALLBACK_RESPONSES
 
-    for keywords, response in FALLBACK_RESPONSES:
-        # Check if ANY keyword matches the user message
+    for keywords, response in responses:
         if any(keyword in message_lower for keyword in keywords):
             return response
 
-    return DEFAULT_RESPONSE
+    return DEFAULT_RESPONSE_HI if lang == 'hi' else DEFAULT_RESPONSE
 
 
-def get_ai_response(user_message: str, chat_history: list = None) -> dict:
+def get_ai_response(user_message: str, chat_history: list = None, lang: str = 'en') -> dict:
     """
     Main function to get chatbot response.
     Tries OpenAI first → falls back to local NLP if unavailable.
@@ -154,7 +203,7 @@ def get_ai_response(user_message: str, chat_history: list = None) -> dict:
             client = OpenAI(api_key=OPENAI_API_KEY)
 
             # Build message history for context-aware conversation
-            messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+            messages = [{"role": "system", "content": get_system_prompt(lang)}]
 
             # Add up to last 6 messages for context (keeps API cost low)
             if chat_history:
@@ -183,6 +232,6 @@ def get_ai_response(user_message: str, chat_history: list = None) -> dict:
 
     # ── FALLBACK: LOCAL KEYWORD MATCHING ─────────────────────────────────────
     return {
-        "response": get_fallback_response(user_message),
+        "response": get_fallback_response(user_message, lang),
         "source": "local"
     }
