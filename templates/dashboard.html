@@ -10,28 +10,28 @@
 </div>
 
 <div class="stats-grid">
-  <div class="stat-card">
+  <div class="stat-card glow-card">
     <div class="stat-icon blue">💊</div>
     <div class="stat-content">
       <div class="stat-value">{{ total_medicines }}</div>
       <div class="stat-label">{{ t('stat_active_medicines') }}</div>
     </div>
   </div>
-  <div class="stat-card">
+  <div class="stat-card glow-card">
     <div class="stat-icon green">✅</div>
     <div class="stat-content">
       <div class="stat-value">{{ taken_count }}</div>
       <div class="stat-label">{{ t('stat_taken_7d') }}</div>
     </div>
   </div>
-  <div class="stat-card">
+  <div class="stat-card glow-card">
     <div class="stat-icon red">❌</div>
     <div class="stat-content">
       <div class="stat-value">{{ missed_count }}</div>
       <div class="stat-label">{{ t('stat_missed_7d') }}</div>
     </div>
   </div>
-  <div class="stat-card">
+  <div class="stat-card glow-card">
     <div class="stat-icon purple">📈</div>
     <div class="stat-content">
       <div class="stat-value">{{ adherence }}%</div>
@@ -40,7 +40,7 @@
   </div>
 </div>
 
-<div class="card mb-3">
+<div class="card mb-3 scroll-reveal">
   <div class="card-header">
     <span class="card-title">📈 {{ t('weekly_adherence') }}</span>
     <a href="{{ url_for('insights.index') }}" class="btn btn-outline btn-sm">{{ t('full_report') }}</a>
@@ -55,7 +55,7 @@
 
 <div class="grid-2">
 
-  <div class="card">
+  <div class="card scroll-reveal">
     <div class="card-header">
       <span class="card-title">💊 {{ t('today_medicines') }}</span>
       <a href="{{ url_for('medicines.index') }}" class="btn btn-primary btn-sm">+ {{ t('add') }}</a>
@@ -81,7 +81,7 @@
     {% endif %}
   </div>
 
-  <div class="card">
+  <div class="card scroll-reveal">
     <div class="card-header">
       <span class="card-title">⏰ {{ t('upcoming_reminders') }}</span>
       <a href="{{ url_for('reminders.index') }}" class="btn btn-outline btn-sm">{{ t('all') }}</a>
@@ -106,7 +106,7 @@
     {% endif %}
   </div>
 
-  <div class="card">
+  <div class="card scroll-reveal">
     <div class="card-header">
       <span class="card-title">⚠️ {{ t('recent_side_effects') }}</span>
       <a href="{{ url_for('side_effects.index') }}" class="btn btn-outline btn-sm">{{ t('all') }}</a>
@@ -131,7 +131,7 @@
     {% endif %}
   </div>
 
-  <div class="card">
+  <div class="card scroll-reveal">
     <div class="card-header">
       <span class="card-title">⚡ {{ t('quick_actions') }}</span>
     </div>

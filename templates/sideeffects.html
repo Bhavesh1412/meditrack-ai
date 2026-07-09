@@ -9,27 +9,27 @@
     <h1>⚠️ {{ t('se_page_title') }}</h1>
     <p>{{ t('se_page_sub') }}</p>
   </div>
-  <button class="btn btn-warning" onclick="openModal('addSEModal')">
+  <button class="btn btn-warning" onclick="openModal('addSEModal')" aria-label="{{ t('report_side_effect_btn') }}">
     + {{ t('report_side_effect_btn') }}
   </button>
 </div>
 
 <div class="stats-grid" style="grid-template-columns: repeat(3,1fr); margin-bottom: 24px;">
-  <div class="stat-card">
+  <div class="stat-card glow-card">
     <div class="stat-icon green">😊</div>
     <div class="stat-content">
       <div class="stat-value">{{ mild_count }}</div>
       <div class="stat-label">{{ t('severity_mild') }}</div>
     </div>
   </div>
-  <div class="stat-card">
+  <div class="stat-card glow-card">
     <div class="stat-icon orange">😐</div>
     <div class="stat-content">
       <div class="stat-value">{{ mod_count }}</div>
       <div class="stat-label">{{ t('severity_moderate') }}</div>
     </div>
   </div>
-  <div class="stat-card">
+  <div class="stat-card glow-card">
     <div class="stat-icon red">😣</div>
     <div class="stat-content">
       <div class="stat-value">{{ sev_count }}</div>
@@ -38,7 +38,7 @@
   </div>
 </div>
 
-<div class="card">
+<div class="card scroll-reveal">
   <div class="card-header">
     <span class="card-title">📋 {{ t('all_reported') }}</span>
     <span style="font-size:0.8rem; color:var(--text-muted);">{{ effects|length }} {{ t('records') }}</span>
@@ -72,7 +72,7 @@
                   action="{{ url_for('side_effects.delete', se_id=e['id']) }}"
                   onsubmit="return confirm({{ t('confirm_delete_se')|tojson }})"
                   style="display:inline;">
-                  <button class="btn btn-danger btn-sm btn-icon">🗑️</button>
+                  <button class="btn btn-danger btn-sm btn-icon" aria-label="Delete">🗑️</button>
                 </form>
               </td>
             </tr>
@@ -90,11 +90,11 @@
 </div>
 
 
-<div class="modal-backdrop" id="addSEModal">
+<div class="modal-backdrop" id="addSEModal" role="dialog" aria-modal="true" aria-label="{{ t('report_modal_title') }}">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title">⚠️ {{ t('report_modal_title') }}</span>
-      <button class="modal-close" onclick="closeModal('addSEModal')">✕</button>
+      <button class="modal-close" onclick="closeModal('addSEModal')" aria-label="Close">✕</button>
     </div>
     <form method="POST" action="{{ url_for('side_effects.add') }}">
       <div class="modal-body">

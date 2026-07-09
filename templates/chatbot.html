@@ -9,16 +9,16 @@
     <h1>🤖 {{ t('chat_title') }}</h1>
     <p>{{ t('chat_sub') }}</p>
   </div>
-  <button class="btn btn-outline btn-sm" onclick="clearChat()">🗑️ {{ t('clear_chat') }}</button>
+  <button class="btn btn-outline btn-sm" onclick="clearChat()" aria-label="{{ t('clear_chat') }}">🗑️ {{ t('clear_chat') }}</button>
 </div>
 
-<div class="chat-disclaimer">
+<div class="chat-disclaimer" role="alert">
   ⚠️ <strong>{{ t('chat_disclaimer') }}</strong>
 </div>
 
 <div class="card card-flush">
   <div class="chat-container">
-    <div class="chat-messages" id="chatMessages">
+    <div class="chat-messages" id="chatMessages" role="log" aria-live="polite">
 
       <div class="chat-bubble bot">
         <div>👋 {{ t('chat_welcome') }}</div>
@@ -52,8 +52,9 @@
         placeholder="{{ t('chat_placeholder') }}"
         maxlength="500"
         autocomplete="off"
+        aria-label="{{ t('chat_placeholder') }}"
       />
-      <button class="chat-send-btn" id="sendBtn" onclick="sendMessage()" title="{{ t('send') }}">
+      <button class="chat-send-btn" id="sendBtn" onclick="sendMessage()" title="{{ t('send') }}" aria-label="{{ t('send') }}">
         ➤
       </button>
     </div>

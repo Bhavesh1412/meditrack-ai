@@ -1,63 +1,73 @@
 <!DOCTYPE html>
-<html lang="{{ current_lang }}">
+<html lang="{{ current_lang }}" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}MediTrack AI{% endblock %}</title>
-  <meta name="theme-color" content="#0b1220" />
+  <meta name="theme-color" content="#09090B" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   {% block extra_css %}{% endblock %}
 </head>
 <body>
 
+<!-- ─── ANIMATED BACKGROUND ────────────────────────────────── -->
+<div class="bg-canvas" aria-hidden="true">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+  <div class="bg-orb bg-orb-4"></div>
+  <div class="bg-gradient-stream"></div>
+  <div class="bg-noise"></div>
+</div>
+
 <div class="app-wrapper">
 
   <!-- ─── SIDEBAR ─────────────────────────────────────────────── -->
-  <aside class="sidebar" id="sidebar">
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
     <div class="sidebar-logo">
-      <div class="logo-icon">💊</div>
+      <div class="logo-icon" aria-hidden="true">💊</div>
       <h2>MediTrack AI</h2>
       <span>{{ t('nav_health_management') }}</span>
     </div>
 
     <nav class="sidebar-nav">
       <div class="nav-section-label">{{ t('nav_main') }}</div>
-      <a href="{{ url_for('dashboard.index') }}" class="{{ 'active' if request.endpoint == 'dashboard.index' }}">
-        <span class="nav-icon">🏠</span> {{ t('nav_dashboard') }}
+      <a href="{{ url_for('dashboard.index') }}" class="{{ 'active' if request.endpoint == 'dashboard.index' }}" aria-label="{{ t('nav_dashboard') }}">
+        <span class="nav-icon" aria-hidden="true">🏠</span> {{ t('nav_dashboard') }}
       </a>
-      <a href="{{ url_for('medicines.index') }}" class="{{ 'active' if request.blueprint == 'medicines' }}">
-        <span class="nav-icon">💊</span> {{ t('nav_medicines') }}
+      <a href="{{ url_for('medicines.index') }}" class="{{ 'active' if request.blueprint == 'medicines' }}" aria-label="{{ t('nav_medicines') }}">
+        <span class="nav-icon" aria-hidden="true">💊</span> {{ t('nav_medicines') }}
       </a>
-      <a href="{{ url_for('reminders.index') }}" class="{{ 'active' if request.blueprint == 'reminders' }}">
-        <span class="nav-icon">⏰</span> {{ t('nav_reminders') }}
+      <a href="{{ url_for('reminders.index') }}" class="{{ 'active' if request.blueprint == 'reminders' }}" aria-label="{{ t('nav_reminders') }}">
+        <span class="nav-icon" aria-hidden="true">⏰</span> {{ t('nav_reminders') }}
       </a>
 
       <div class="nav-section-label">{{ t('nav_track') }}</div>
-      <a href="{{ url_for('side_effects.index') }}" class="{{ 'active' if request.blueprint == 'side_effects' }}">
-        <span class="nav-icon">⚠️</span> {{ t('nav_side_effects') }}
+      <a href="{{ url_for('side_effects.index') }}" class="{{ 'active' if request.blueprint == 'side_effects' }}" aria-label="{{ t('nav_side_effects') }}">
+        <span class="nav-icon" aria-hidden="true">⚠️</span> {{ t('nav_side_effects') }}
       </a>
-      <a href="{{ url_for('insights.index') }}" class="{{ 'active' if request.blueprint == 'insights' }}">
-        <span class="nav-icon">📊</span> {{ t('nav_insights') }}
+      <a href="{{ url_for('insights.index') }}" class="{{ 'active' if request.blueprint == 'insights' }}" aria-label="{{ t('nav_insights') }}">
+        <span class="nav-icon" aria-hidden="true">📊</span> {{ t('nav_insights') }}
       </a>
 
       <div class="nav-section-label">{{ t('nav_ai') }}</div>
-      <a href="{{ url_for('chatbot.index') }}" class="{{ 'active' if request.blueprint == 'chatbot' }}">
-        <span class="nav-icon">🤖</span> {{ t('nav_ai_assistant') }}
+      <a href="{{ url_for('chatbot.index') }}" class="{{ 'active' if request.blueprint == 'chatbot' }}" aria-label="{{ t('nav_ai_assistant') }}">
+        <span class="nav-icon" aria-hidden="true">🤖</span> {{ t('nav_ai_assistant') }}
       </a>
     </nav>
 
     <div class="sidebar-footer">
       <div class="user-info">
-        <div class="user-avatar">{{ session.get('user_name', 'U')[0].upper() }}</div>
+        <div class="user-avatar" aria-hidden="true">{{ session.get('user_name', 'U')[0].upper() }}</div>
         <div>
           <div class="user-name">{{ session.get('user_name', 'User') }}</div>
           <div class="user-email">{{ session.get('user_email', '') }}</div>
         </div>
       </div>
-      <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm w-100">
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm w-100" aria-label="{{ t('nav_logout') }}">
         🚪 {{ t('nav_logout') }}
       </a>
     </div>
@@ -69,11 +79,15 @@
     <!-- Top Bar -->
     <header class="topbar">
       <div class="d-flex align-center gap-1">
-        <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
         <span class="topbar-title">{% block page_title %}<span>Medi</span>Track AI{% endblock %}</span>
       </div>
       <div class="topbar-right">
         {% include 'partials/lang_toggle.html' %}
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle dark/light mode">
+          <span class="theme-icon-dark">🌙</span>
+          <span class="theme-icon-light">☀️</span>
+        </button>
         <span class="topbar-date" id="currentDate"></span>
       </div>
     </header>
@@ -83,7 +97,7 @@
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">
+            <div class="alert alert-{{ category }}" role="alert">
               {% if category == 'success' %}✅{% elif category == 'danger' %}❌{% elif category == 'warning' %}⚠️{% else %}ℹ️{% endif %}
               {{ message }}
             </div>
@@ -101,9 +115,22 @@
 </div><!-- /.app-wrapper -->
 
 <!-- Mobile overlay -->
-<div class="overlay-close" id="sidebarOverlay"></div>
+<div class="overlay-close" id="sidebarOverlay" aria-hidden="true"></div>
 
 <script>
+  // ── Theme toggle ────────────────────────────────────────────────
+  const html = document.documentElement;
+  const themeBtn = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('meditrack-theme') || 'dark';
+  html.setAttribute('data-theme', savedTheme);
+
+  themeBtn.addEventListener('click', () => {
+    const current = html.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('meditrack-theme', next);
+  });
+
   // ── Display current date in topbar ──────────────────────────────
   document.getElementById('currentDate').textContent =
     new Date().toLocaleDateString({{ "'hi-IN'" if current_lang == 'hi' else "'en-US'" }}, { weekday:'short', month:'short', day:'numeric' });
@@ -129,6 +156,28 @@
       el.style.opacity = '0';
       setTimeout(() => el.remove(), 400);
     }, 4000);
+  });
+
+  // ── Scroll reveal ───────────────────────────────────────────────
+  const revealElements = document.querySelectorAll('.scroll-reveal');
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+      }
+    });
+  }, { threshold: 0.1 });
+  revealElements.forEach(el => revealObserver.observe(el));
+
+  // ── Mouse glow effect on cards ──────────────────────────────────
+  document.querySelectorAll('.card, .stat-card, .medicine-card, .chart-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      card.style.setProperty('--mouse-x', x + '%');
+      card.style.setProperty('--mouse-y', y + '%');
+    });
   });
 </script>
 

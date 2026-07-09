@@ -10,21 +10,21 @@
 </div>
 
 <div class="stats-grid" style="grid-template-columns: repeat(3,1fr); margin-bottom: 24px;">
-  <div class="stat-card">
+  <div class="stat-card glow-card">
     <div class="stat-icon green">✅</div>
     <div class="stat-content">
       <div class="stat-value">{{ total_taken }}</div>
       <div class="stat-label">{{ t('stat_taken_30d') }}</div>
     </div>
   </div>
-  <div class="stat-card">
+  <div class="stat-card glow-card">
     <div class="stat-icon red">❌</div>
     <div class="stat-content">
       <div class="stat-value">{{ total_missed }}</div>
       <div class="stat-label">{{ t('stat_missed_30d') }}</div>
     </div>
   </div>
-  <div class="stat-card">
+  <div class="stat-card glow-card">
     <div class="stat-icon purple">📈</div>
     <div class="stat-content">
       <div class="stat-value">{{ adherence_pct }}%</div>
@@ -35,7 +35,7 @@
 
 <div class="grid-2">
 
-  <div class="card">
+  <div class="card scroll-reveal">
     <div class="card-header">
       <span class="card-title">💊 {{ t('today_schedule') }}</span>
     </div>
@@ -69,7 +69,7 @@
     {% endif %}
   </div>
 
-  <div class="card">
+  <div class="card scroll-reveal">
     <div class="card-header">
       <span class="card-title">📋 {{ t('today_log') }}</span>
     </div>
@@ -110,11 +110,13 @@
 
 <div id="toast" style="
   position: fixed; bottom: 24px; right: 24px;
-  background: var(--text-primary); color: #fff;
-  padding: 12px 20px; border-radius: 10px;
+  background: var(--bg-elevated); color: var(--text-primary);
+  padding: 14px 22px; border-radius: 14px;
   font-size: 0.875rem; font-weight: 600;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  border: 1px solid var(--card-border);
   display: none; z-index: 999;
+  backdrop-filter: blur(16px);
 "></div>
 
 {% endblock %}
@@ -127,12 +129,17 @@
     toastError: {{ t('toast_error')|tojson }},
   };
 
-  function showToast(msg, color = '#22c55e') {
+  function showToast(msg, color = '#22C55E') {
     const el = document.getElementById('toast');
     el.textContent = msg;
-    el.style.background = color;
+    el.style.borderColor = color;
     el.style.display = 'block';
-    setTimeout(() => el.style.display = 'none', 2500);
+    el.style.animation = 'slideIn 0.3s ease';
+    setTimeout(() => {
+      el.style.opacity = '0';
+      el.style.transition = 'opacity 0.3s';
+      setTimeout(() => { el.style.display = 'none'; el.style.opacity = '1'; el.style.animation = ''; }, 300);
+    }, 2500);
   }
 
   async function markDose(medicineId, status, scheduledTime, btn) {
@@ -149,7 +156,7 @@
 
     if (data.success) {
       const icon  = status === 'taken' ? '✅' : '❌';
-      const color = status === 'taken' ? '#22c55e' : '#ef4444';
+      const color = status === 'taken' ? '#22C55E' : '#EF4444';
       showToast(`${icon} ${data.message}`, color);
 
       row.style.transition = 'opacity 0.4s';
@@ -176,7 +183,7 @@
       `;
       tbody.insertBefore(tr, tbody.firstChild);
     } else {
-      showToast(I18N.toastError, '#ef4444');
+      showToast(I18N.toastError, '#EF4444');
       row.querySelectorAll('button').forEach(b => b.disabled = false);
     }
   }

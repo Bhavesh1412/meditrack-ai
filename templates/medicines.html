@@ -9,7 +9,7 @@
     <h1>💊 {{ t('med_page_title') }}</h1>
     <p>{{ t('med_page_sub') }}</p>
   </div>
-  <button class="btn btn-primary" onclick="openModal('addModal')">
+  <button class="btn btn-primary" onclick="openModal('addModal')" aria-label="{{ t('add_medicine') }}">
     + {{ t('add_medicine') }}
   </button>
 </div>
@@ -17,7 +17,7 @@
 {% if medicines %}
   <div class="medicine-grid">
     {% for med in medicines %}
-      <div class="medicine-card {{ 'inactive' if not med['is_active'] }}">
+      <div class="medicine-card {{ 'inactive' if not med['is_active'] }} scroll-reveal">
         <div class="medicine-card-header">
           <div>
             <div class="medicine-name">{{ med['name'] }}</div>
@@ -63,11 +63,11 @@
 {% endif %}
 
 
-<div class="modal-backdrop {{ 'open' if show_modal }}" id="addModal">
+<div class="modal-backdrop {{ 'open' if show_modal }}" id="addModal" role="dialog" aria-modal="true" aria-label="{{ t('add_new_medicine_modal') }}">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title">💊 {{ t('add_new_medicine_modal') }}</span>
-      <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+      <button class="modal-close" onclick="closeModal('addModal')" aria-label="Close">✕</button>
     </div>
     <form method="POST" action="{{ url_for('medicines.add') }}">
       <div class="modal-body">
@@ -130,11 +130,11 @@
 </div>
 
 
-<div class="modal-backdrop" id="editModal">
+<div class="modal-backdrop" id="editModal" role="dialog" aria-modal="true" aria-label="{{ t('edit_medicine') }}">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title">✏️ {{ t('edit_medicine') }}</span>
-      <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+      <button class="modal-close" onclick="closeModal('editModal')" aria-label="Close">✕</button>
     </div>
     <form method="POST" id="editForm">
       <div class="modal-body">
