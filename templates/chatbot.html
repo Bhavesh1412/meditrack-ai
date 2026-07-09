@@ -20,7 +20,7 @@
 </div>
 
 <!-- Chat Container -->
-<div class="card" style="padding: 0; overflow: hidden;">
+<div class="card card-flush">
   <div class="chat-container">
 
     <!-- Messages area -->
@@ -71,8 +71,8 @@
 </div>
 
 <!-- Quick question chips -->
-<div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px;">
-  <span style="font-size: 0.78rem; color: var(--text-muted); align-self: center;">Try asking:</span>
+<div class="quick-chips">
+  <span class="quick-chips-label">Try asking:</span>
   {% for q in [
     "What are common side effects of ibuprofen?",
     "What should I do if I missed a dose?",

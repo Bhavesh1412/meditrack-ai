@@ -47,7 +47,7 @@
     <span class="card-title">📈 Weekly Adherence</span>
     <a href="{{ url_for('insights.index') }}" class="btn btn-outline btn-sm">Full Report</a>
   </div>
-  <div style="margin-bottom: 6px; font-size: 0.85rem; color: var(--text-secondary);">
+  <div class="adherence-text">
     {{ adherence }}% — {{ taken_count }} taken out of {{ taken_count + missed_count }} scheduled doses
   </div>
   <div class="progress-bar-wrapper">
@@ -142,7 +142,7 @@
     <div class="card-header">
       <span class="card-title">⚡ Quick Actions</span>
     </div>
-    <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div class="quick-actions">
       <a href="{{ url_for('medicines.index') }}" class="btn btn-primary">
         💊 Add New Medicine
       </a>
