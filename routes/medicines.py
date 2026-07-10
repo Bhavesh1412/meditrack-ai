@@ -54,13 +54,13 @@ def add():
 
         # Auto-create reminders for each time slot
         med_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
-        for t in time.split(','):
-            t = t.strip()
-            if t:
+        for slot in time.split(','):
+            slot = slot.strip()
+            if slot:
                 conn.execute("""
                     INSERT INTO reminders (user_id, medicine_id, reminder_time)
                     VALUES (?, ?, ?)
-                """, (user_id, med_id, t))
+                """, (user_id, med_id, slot))
 
         conn.commit()
         conn.close()
