@@ -1,6 +1,6 @@
 """
 database.py - Database initialization and connection utilities
-Handles SQLite database setup for MediTrack AI
+Handles SQLite database setup for Nabz AI
 """
 
 import sqlite3

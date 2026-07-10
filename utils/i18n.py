@@ -1,5 +1,5 @@
 """
-i18n.py - English / Hindi translations for MediTrack AI
+i18n.py - English / Hindi translations for Nabz AI
 """
 
 from flask import session, has_request_context
@@ -99,8 +99,8 @@ TRANSLATIONS = {
         'full_report': 'Full Report',
         'send': 'Send',
         'you': 'You',
-        'medibot': 'MediBot',
-        'medibot_ai': 'MediBot (AI)',
+        'medibot': 'NabzBot',
+        'medibot_ai': 'NabzBot (AI)',
         'ai_assistant': 'AI Assistant',
 
         # Status & severity
@@ -122,7 +122,7 @@ TRANSLATIONS = {
 
         # Auth
         'auth_welcome_back': 'Welcome back',
-        'auth_sign_in_sub': 'Sign in to your MediTrack account',
+        'auth_sign_in_sub': 'Sign in to your Nabz AI account',
         'auth_create_account': 'Create Account',
         'auth_create_sub': 'Start managing your health today',
         'auth_email': 'Email Address',
@@ -265,10 +265,10 @@ TRANSLATIONS = {
 
         # Chatbot
         'chat_title': 'AI Health Assistant',
-        'chat_sub': 'Ask MediBot about medications, side effects, and general health',
+        'chat_sub': 'Ask NabzBot about medications, side effects, and general health',
         'clear_chat': 'Clear Chat',
-        'chat_disclaimer': 'Disclaimer: MediBot provides general health information only. This chatbot does not replace professional medical advice. Always consult a qualified healthcare provider for medical decisions.',
-        'chat_welcome': "Hi! I'm MediBot, your AI health assistant.",
+        'chat_disclaimer': 'Disclaimer: NabzBot provides general health information only. This chatbot does not replace professional medical advice. Always consult a qualified healthcare provider for medical decisions.',
+        'chat_welcome': "Hi! I'm NabzBot, your AI health assistant.",
         'chat_can_help': 'I can help with:',
         'chat_help_meds': 'Medication questions',
         'chat_help_se': 'Side effect information',
@@ -385,8 +385,8 @@ TRANSLATIONS = {
         'full_report': 'पूरी रिपोर्ट',
         'send': 'भेजें',
         'you': 'आप',
-        'medibot': 'मेडीबॉट',
-        'medibot_ai': 'मेडीबॉट (AI)',
+        'medibot': 'नब्ज़ बॉट',
+        'medibot_ai': 'नब्ज़ बॉट (AI)',
         'ai_assistant': 'AI सहायक',
 
         # Status & severity
@@ -408,7 +408,7 @@ TRANSLATIONS = {
 
         # Auth
         'auth_welcome_back': 'वापसी पर स्वागत है',
-        'auth_sign_in_sub': 'अपने MediTrack खाते में साइन इन करें',
+        'auth_sign_in_sub': 'अपने Nabz AI खाते में साइन इन करें',
         'auth_create_account': 'खाता बनाएँ',
         'auth_create_sub': 'आज से अपना स्वास्थ्य प्रबंधन शुरू करें',
         'auth_email': 'ईमेल पता',
@@ -549,10 +549,10 @@ TRANSLATIONS = {
 
         # Chatbot
         'chat_title': 'AI स्वास्थ्य सहायक',
-        'chat_sub': 'मेडीबॉट से दवाइयों, दुष्प्रभाव और सामान्य स्वास्थ्य के बारे में पूछें',
+        'chat_sub': 'नब्ज़ बॉट से दवाइयों, दुष्प्रभाव और सामान्य स्वास्थ्य के बारे में पूछें',
         'clear_chat': 'चैट साफ़ करें',
-        'chat_disclaimer': 'अस्वीकरण: मेडीबॉट केवल सामान्य स्वास्थ्य जानकारी देता है। यह चैटबॉट पेशेवर चिकित्सा सलाह का विकल्प नहीं है। चिकित्सा निर्णयों के लिए हमेशा योग्य स्वास्थ्य प्रदाता से परामर्श लें।',
-        'chat_welcome': 'नमस्ते! मैं मेडीबॉट, आपका AI स्वास्थ्य सहायक हूँ।',
+        'chat_disclaimer': 'अस्वीकरण: नब्ज़ बॉट केवल सामान्य स्वास्थ्य जानकारी देता है। यह चैटबॉट पेशेवर चिकित्सा सलाह का विकल्प नहीं है। चिकित्सा निर्णयों के लिए हमेशा योग्य स्वास्थ्य प्रदाता से परामर्श लें।',
+        'chat_welcome': 'नमस्ते! मैं नब्ज़ बॉट, आपका AI स्वास्थ्य सहायक हूँ।',
         'chat_can_help': 'मैं इनमें मदद कर सकता हूँ:',
         'chat_help_meds': 'दवा संबंधी प्रश्न',
         'chat_help_se': 'दुष्प्रभाव जानकारी',

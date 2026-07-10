@@ -1,5 +1,5 @@
 """
-app.py - MediTrack AI Main Application Entry Point
+app.py - Nabz AI Main Application Entry Point
 Run with: python app.py
 """
 
@@ -39,7 +39,7 @@ def create_app():
     app = Flask(__name__)
 
     # ── Security configuration ────────────────────────────────────────────────
-    app.secret_key = os.environ.get('SECRET_KEY', 'meditrack-dev-secret-change-in-production')
+    app.secret_key = os.environ.get('SECRET_KEY', 'nabz-dev-secret-change-in-production')
     app.permanent_session_lifetime = timedelta(days=7)
 
     # ── i18n: inject translation helpers into all templates ─────────────────
@@ -75,5 +75,5 @@ def create_app():
 app = create_app()
 
 if __name__ == '__main__':
-    print("MediTrack AI running at http://localhost:5000")
+    print("Nabz AI running at http://localhost:5000")
     app.run(debug=True, host='0.0.0.0', port=5000)

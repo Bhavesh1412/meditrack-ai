@@ -1,8 +1,7 @@
-<<<<<<< HEAD
-# 💊 MediTrack AI — Medicine Reminder & Side Effect Tracker
+# 💊 Nabz AI (नब्ज़ AI) — AI-Powered Health Management Platform
 
 > **UN SDG 3: Good Health and Well-Being**
-> A full-stack AI-powered web application for managing medications, tracking side effects, and consulting an AI health assistant.
+> A full-stack AI-powered web application for managing medications, tracking side effects, uploading medical documents, and consulting an AI health assistant.
 
 ---
 
@@ -17,6 +16,7 @@
 | ⚠️ Side Effect Tracker | Report and monitor medication reactions |
 | 🤖 AI Health Assistant | OpenAI GPT + local keyword fallback chatbot |
 | 📈 Insights Dashboard | Charts: adherence trends, side effects, per-medicine stats |
+| 📁 Health Vault | Upload, manage, and get AI analysis on medical documents |
 | 📱 Responsive Design | Mobile-friendly sidebar layout |
 
 ---
@@ -28,6 +28,7 @@
 - **Frontend:** HTML5, CSS3, Vanilla JavaScript
 - **Charts:** Chart.js 4
 - **AI:** OpenAI GPT-3.5-turbo (+ local fallback)
+- **Document Processing:** PyPDF2, pytesseract OCR
 - **Security:** bcrypt password hashing, session management
 
 ---
@@ -35,7 +36,7 @@
 ## 📁 Project Structure
 
 ```
-meditrack/
+nabz-ai/
 ├── app.py                  # Flask app factory & entry point
 ├── requirements.txt        # Python dependencies
 ├── database.db             # SQLite database 
@@ -47,12 +48,15 @@ meditrack/
 │   ├── reminders.py        # Reminder tracking
 │   ├── side_effects.py     # Side effect tracker
 │   ├── chatbot.py          # AI chatbot routes
-│   └── insights.py         # Analytics & chart data APIs
+│   ├── insights.py         # Analytics & chart data APIs
+│   └── vault.py            # Health Vault document management
 │
 ├── utils/                  # Utility modules
 │   ├── database.py         # DB connection & schema init
 │   ├── auth_helpers.py     # Password hashing, login decorator
-│   └── chatbot.py          # OpenAI + fallback AI logic
+│   ├── chatbot.py          # OpenAI + fallback AI logic
+│   ├── vault_ai.py         # AI document analysis
+│   └── i18n.py             # English/Hindi translations
 │
 ├── templates/              # Jinja2 HTML templates
 │   ├── base.html           # Sidebar layout base
@@ -64,7 +68,10 @@ meditrack/
 │   ├── sideeffects.html
 │   ├── chatbot.html
 │   ├── insights.html
-│   └── history.html
+│   ├── history.html
+│   ├── vault.html
+│   └── partials/
+│       └── lang_toggle.html
 │
 └── static/
     └── css/
@@ -128,8 +135,9 @@ Visit → **http://localhost:5000**
 3. Log in with your credentials
 4. Add your first medicine via the **Medicines** page
 5. Check **Reminders** to mark doses as taken/missed
-6. Chat with **MediBot** on the AI Assistant page
-7. View your stats on the **Insights** page
+6. Chat with **NabzBot** on the AI Assistant page
+7. Upload documents to your **Health Vault** for AI analysis
+8. View your stats on the **Insights** page
 
 ---
 
@@ -142,6 +150,8 @@ reminders           -- id, user_id, medicine_id, reminder_time, is_active
 medication_history  -- id, user_id, medicine_id, status (taken/missed/skipped), taken_at
 side_effects        -- id, user_id, medicine_id, symptom, severity, description, reported_at
 chat_history        -- id, user_id, role (user/assistant), message, created_at
+health_vault        -- id, user_id, file_name, original_name, file_type, file_path, ai_summary, ai_conflicts, ai_suggestions
+vault_chat          -- id, user_id, vault_id, role (user/assistant), message, created_at
 ```
 
 ---
@@ -155,6 +165,7 @@ chat_history        -- id, user_id, role (user/assistant), message, created_at
 | Dashboard | `screenshots/dashboard.png` |
 | Medicines | `screenshots/medicines.png` |
 | AI Chat | `screenshots/chatbot.png` |
+| Health Vault | `screenshots/vault.png` |
 | Insights | `screenshots/insights.png` |
 
 ---
@@ -167,6 +178,7 @@ chat_history        -- id, user_id, role (user/assistant), message, created_at
 - ✅ All DB queries use **parameterized statements** (SQL injection safe)
 - ✅ User data isolation — users only see their own data
 - ✅ CSRF protection via form POST methods
+- ✅ Vault files served through protected routes (no direct path exposure)
 
 ---
 
@@ -176,10 +188,10 @@ chat_history        -- id, user_id, role (user/assistant), message, created_at
 # Initialize git
 git init
 git add .
-git commit -m "Initial commit: MediTrack AI complete project"
+git commit -m "Initial commit: Nabz AI complete project"
 
 # Push to GitHub
-git remote add origin https://github.com/YOUR_USERNAME/meditrack-ai.git
+git remote add origin https://github.com/YOUR_USERNAME/nabz-ai.git
 git branch -M main
 git push -u origin main
 ```
@@ -191,13 +203,14 @@ database.db
 .env
 __pycache__/
 *.pyc
+static/uploads/
 ```
 
 ---
 
 ## 🎓 Academic Information
 
-- **Project:** MediTrack AI – Medicine Reminder and Side Effect Tracker
+- **Project:** Nabz AI (नब्ज़ AI) – AI-Powered Health Management Platform
 - **SDG Alignment:** UN SDG 3 – Good Health and Well-Being
 - **Tech Stack:** Python, Flask, SQLite, HTML/CSS/JS, Chart.js, OpenAI API
 - **Architecture:** MVC-style, Blueprint-based modular Flask app
@@ -206,11 +219,8 @@ __pycache__/
 
 ## ⚠️ Disclaimer
 
-MediTrack AI is an academic project. The AI chatbot provides **general health information only** and does **not** replace professional medical advice. Always consult a qualified healthcare provider for medical decisions.
+Nabz AI is an academic project. The AI chatbot provides **general health information only** and does **not** replace professional medical advice. Always consult a qualified healthcare provider for medical decisions.
 
 ---
 
 *Built with ❤️ for university project submission*
-=======
-# meditrack-ai
->>>>>>> 779e13e80853943d9687e38cdb5e2b93f9a1df89

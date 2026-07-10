@@ -9,7 +9,7 @@ from utils.openai_helper import chat_completions_create, get_groq_model, is_groq
 
 # ─── SYSTEM PROMPT FOR THE AI ────────────────────────────────────────────────
 SYSTEM_PROMPT = """
-You are MediBot, a helpful AI health assistant integrated into MediTrack AI.
+You are NabzBot, a helpful AI health assistant integrated into Nabz AI.
 Your role is to:
 - Answer questions about medications, dosages, and schedules
 - Explain common side effects of medicines
@@ -33,7 +33,7 @@ FALLBACK_RESPONSES = [
         ['miss', 'missed', 'forgot', 'skip', 'skipped'],
         "If you missed a dose, take it as soon as you remember — unless it's "
         "almost time for the next one. Never double-dose. Set reminders in "
-        "MediTrack to avoid missing doses in the future! ⏰"
+        "Nabz AI to avoid missing doses in the future! ⏰"
     ),
     (
         ['dosage', 'dose', 'how much', 'how many'],
@@ -85,7 +85,7 @@ FALLBACK_RESPONSES = [
     ),
     (
         ['hello', 'hi', 'hey', 'good morning', 'good evening'],
-        "Hello! 👋 I'm MediBot, your AI health assistant. I can help you with "
+        "Hello! 👋 I'm NabzBot, your AI health assistant. I can help you with "
         "medication questions, side effects, and general health guidance. "
         "What would you like to know today?"
     ),
@@ -131,7 +131,7 @@ FALLBACK_RESPONSES_HI = [
     (
         ['miss', 'missed', 'forgot', 'skip', 'skipped', 'bhool', 'chhod'],
         "अगर खुराक छूट गई हो तो याद आते ही लें — जब तक अगली खुराक का समय न हो। "
-        "कभी दोहरी खुराक न लें। MediTrack में रिमाइंडर सेट करें! ⏰"
+        "कभी दोहरी खुराक न लें। Nabz AI में रिमाइंडर सेट करें! ⏰"
     ),
     (
         ['dosage', 'dose', 'how much', 'khurak', 'खुराक'],
@@ -140,7 +140,7 @@ FALLBACK_RESPONSES_HI = [
     ),
     (
         ['hello', 'hi', 'hey', 'namaste', 'नमस्ते'],
-        "नमस्ते! 👋 मैं मेडीबॉट, आपका AI स्वास्थ्य सहायक हूँ। "
+        "नमस्ते! 👋 मैं नब्ज़ बॉट, आपका AI स्वास्थ्य सहायक हूँ। "
         "दवा, दुष्प्रभाव और सामान्य स्वास्थ्य मार्गदर्शन में मदद कर सकता हूँ। "
         "आज क्या जानना चाहेंगे?"
     ),
