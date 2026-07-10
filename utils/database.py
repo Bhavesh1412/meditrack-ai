@@ -148,5 +148,39 @@ def init_db():
     """)
 
     conn.commit()
+
+    # ─── MIGRATIONS ───────────────────────────────────────────────────────────
+    # Backfill columns that may be missing from databases created by an older
+    # schema (CREATE TABLE IF NOT EXISTS won't add columns to existing tables).
+    # SQLite only allows constant defaults when adding a column, so datetime
+    # columns are added without a default and backfilled via UPDATE.
+    _add_column_if_missing(conn, 'medicines', 'is_active', 'INTEGER DEFAULT 1')
+    _add_column_if_missing(conn, 'medicines', 'created_at', 'TEXT')
+    _add_column_if_missing(conn, 'reminders', 'is_active', 'INTEGER DEFAULT 1')
+    _add_column_if_missing(conn, 'reminders', 'created_at', 'TEXT')
+    _add_column_if_missing(conn, 'medication_history', 'created_at', 'TEXT')
+    _add_column_if_missing(conn, 'side_effects', 'created_at', 'TEXT')
+    _add_column_if_missing(conn, 'chat_history', 'created_at', 'TEXT')
+    _add_column_if_missing(conn, 'health_vault', 'uploaded_at', 'TEXT')
+    _add_column_if_missing(conn, 'vault_chat', 'created_at', 'TEXT')
+
+    # Backfill any NULL timestamps created by the migration above.
+    for table, col in [
+        ('medicines', 'created_at'), ('reminders', 'created_at'),
+        ('medication_history', 'created_at'), ('side_effects', 'created_at'),
+        ('chat_history', 'created_at'), ('health_vault', 'uploaded_at'),
+        ('vault_chat', 'created_at'),
+    ]:
+        conn.execute(f"UPDATE {table} SET {col} = datetime('now') WHERE {col} IS NULL")
+    conn.execute("UPDATE medicines SET is_active = 1 WHERE is_active IS NULL")
+
+    conn.commit()
     conn.close()
     print("✅ Database initialized successfully.")
+
+
+def _add_column_if_missing(conn, table, column, definition):
+    """Add `column` to `table` only if it does not already exist."""
+    exists = conn.execute(f"PRAGMA table_info({table})").fetchall()
+    if column not in [row[1] for row in exists]:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
