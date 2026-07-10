@@ -17,6 +17,7 @@ from utils.openai_helper import is_openai_configured
 print(f"[Startup] OPENAI_API_KEY set: {bool(os.environ.get('OPENAI_API_KEY'))}")
 print(f"[Startup] OPENAI_MODEL: {os.environ.get('OPENAI_MODEL', 'gpt-3.5-turbo')}")
 print(f"[Startup] OpenAI configured: {is_openai_configured()}")
+print(f"[Startup] Proxy env vars: HTTP_PROXY={os.environ.get('HTTP_PROXY', 'not set')}, HTTPS_PROXY={os.environ.get('HTTPS_PROXY', 'not set')}")
 
 # ─── Import all route blueprints ─────────────────────────────────────────────
 from routes.auth        import auth_bp

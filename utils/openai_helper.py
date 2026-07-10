@@ -6,10 +6,12 @@ import os
 
 try:
     from openai import OpenAI
+    import httpx
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False
     OpenAI = None
+    httpx = None
 
 
 def get_openai_api_key() -> str:
@@ -28,4 +30,5 @@ def is_openai_configured() -> bool:
 def create_openai_client():
     if not is_openai_configured():
         return None
-    return OpenAI(api_key=get_openai_api_key())
+    _http_client = httpx.Client(proxy=None) if httpx else None
+    return OpenAI(api_key=get_openai_api_key(), http_client=_http_client)
