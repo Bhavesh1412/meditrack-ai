@@ -3,18 +3,9 @@ chatbot.py - AI Health Assistant logic
 Tries OpenAI API first; falls back to local keyword-based responses.
 """
 
-import os
 import re
 
-# ─── OPENAI INTEGRATION ──────────────────────────────────────────────────────
-# Install with: pip install openai
-try:
-    from openai import OpenAI
-    OPENAI_AVAILABLE = True
-except ImportError:
-    OPENAI_AVAILABLE = False
-
-OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+from utils.openai_helper import create_openai_client, get_openai_model, is_openai_configured
 
 # ─── SYSTEM PROMPT FOR THE AI ────────────────────────────────────────────────
 SYSTEM_PROMPT = """
@@ -198,9 +189,9 @@ def get_ai_response(user_message: str, chat_history: list = None, lang: str = 'e
         dict with 'response' (str) and 'source' ('openai' or 'local')
     """
     # ── TRY OPENAI API ────────────────────────────────────────────────────────
-    if OPENAI_AVAILABLE and OPENAI_API_KEY:
+    if is_openai_configured():
         try:
-            client = OpenAI(api_key=OPENAI_API_KEY)
+            client = create_openai_client()
 
             # Build message history for context-aware conversation
             messages = [{"role": "system", "content": get_system_prompt(lang)}]
@@ -216,7 +207,7 @@ def get_ai_response(user_message: str, chat_history: list = None, lang: str = 'e
             messages.append({"role": "user", "content": user_message})
 
             response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model=get_openai_model(),
                 messages=messages,
                 max_tokens=200,
                 temperature=0.7

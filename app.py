@@ -12,6 +12,12 @@ from utils.i18n import get_lang, t, t_freq, t_severity, t_status, SUPPORTED_LANG
 
 load_dotenv()
 
+from utils.openai_helper import is_openai_configured
+
+print(f"[Startup] OPENAI_API_KEY set: {bool(os.environ.get('OPENAI_API_KEY'))}")
+print(f"[Startup] OPENAI_MODEL: {os.environ.get('OPENAI_MODEL', 'gpt-3.5-turbo')}")
+print(f"[Startup] OpenAI configured: {is_openai_configured()}")
+
 # ─── Import all route blueprints ─────────────────────────────────────────────
 from routes.auth        import auth_bp
 from routes.dashboard   import dashboard_bp

@@ -241,6 +241,20 @@ def analyse(vault_id):
     return jsonify({'success': True, **result})
 
 
+@vault_bp.route('/vault/ai-status')
+@login_required
+def ai_status():
+    """Debug endpoint: check if OpenAI is configured (does not expose full key)."""
+    from utils.openai_helper import get_openai_api_key, get_openai_model, is_openai_configured
+
+    key = get_openai_api_key()
+    return jsonify({
+        'openai_configured': is_openai_configured(),
+        'key_hint': f'{key[:7]}…' if len(key) > 7 else ('set' if key else 'missing'),
+        'model': get_openai_model(),
+    })
+
+
 def _run_analysis(vault_id, user_id):
     """
     Internal helper: extract text from document, run AI analysis, update DB.
@@ -263,11 +277,15 @@ def _run_analysis(vault_id, user_id):
     ).fetchall()
     medicines_list = [m['name'] for m in medicines]
 
+    # Get language preference for analysis
+    from utils.i18n import get_lang
+    lang = get_lang()
+
     # Extract text from document
     extracted_text = _extract_text(doc['file_path'], doc['original_name'])
 
     # Run AI analysis
-    analysis = analyse_document(extracted_text, medicines_list)
+    analysis = analyse_document(extracted_text, medicines_list, lang=lang)
 
     # Update database with results
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -352,13 +370,15 @@ def chat():
 
     # Load document context if vault_id provided
     doc_summary = None
+    doc_text = None
     if vault_id:
         doc = conn.execute(
-            "SELECT ai_summary FROM health_vault WHERE id = ? AND user_id = ?",
+            "SELECT ai_summary, file_path, original_name FROM health_vault WHERE id = ? AND user_id = ?",
             (vault_id, user_id)
         ).fetchone()
         if doc:
             doc_summary = doc['ai_summary']
+            doc_text = _extract_text(doc['file_path'], doc['original_name'])
 
     # Load user's active medicines
     medicines = conn.execute(
@@ -392,6 +412,7 @@ def chat():
     result = vault_chat_response(
         user_message=message,
         document_summary=doc_summary,
+        document_text=doc_text,
         medicines_list=medicines_list,
         chat_history=chat_history,
         lang=lang
