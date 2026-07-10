@@ -21,6 +21,7 @@ from routes.side_effects import side_effects_bp
 from routes.chatbot     import chatbot_bp
 from routes.insights    import insights_bp
 from routes.language    import language_bp
+from routes.vault       import vault_bp
 
 
 def create_app():
@@ -52,6 +53,7 @@ def create_app():
     app.register_blueprint(side_effects_bp)
     app.register_blueprint(chatbot_bp)
     app.register_blueprint(insights_bp)
+    app.register_blueprint(vault_bp)
 
     # ── Initialize database tables on first run ───────────────────────────────
     with app.app_context():

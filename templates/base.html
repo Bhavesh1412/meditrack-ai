@@ -46,6 +46,9 @@
       </a>
 
       <div class="nav-section-label">{{ t('nav_track') }}</div>
+      <a href="{{ url_for('vault.index') }}" class="{{ 'active' if request.blueprint == 'vault' }}" aria-label="{{ t('nav_health_vault') }}">
+        <span class="nav-icon" aria-hidden="true">📁</span> {{ t('nav_health_vault') }}
+      </a>
       <a href="{{ url_for('side_effects.index') }}" class="{{ 'active' if request.blueprint == 'side_effects' }}" aria-label="{{ t('nav_side_effects') }}">
         <span class="nav-icon" aria-hidden="true">⚠️</span> {{ t('nav_side_effects') }}
       </a>

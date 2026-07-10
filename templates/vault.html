@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+{% block title %}{{ t('vault_page_title') }} – MediTrack AI{% endblock %}
+{% block page_title %}📁 {{ t('nav_health_vault') }}{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-flex justify-between align-center">
+  <div>
+    <h1>📁 {{ t('vault_page_title') }}</h1>
+    <p>{{ t('vault_page_sub') }}</p>
+  </div>
+  <button class="btn btn-primary" onclick="openModal('uploadModal')" aria-label="{{ t('vault_upload_btn') }}">
+    + {{ t('vault_upload_btn') }}
+  </button>
+</div>
+
+<div class="stats-grid" style="grid-template-columns: repeat(3,1fr); margin-bottom: 24px;">
+  <div class="stat-card glow-card">
+    <div class="stat-icon blue">📁</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ total_count }}</div>
+      <div class="stat-label">{{ t('vault_stat_total') }}</div>
+    </div>
+  </div>
+  <div class="stat-card glow-card">
+    <div class="stat-icon green">✅</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ analysed_count }}</div>
+      <div class="stat-label">{{ t('vault_stat_analyzed') }}</div>
+    </div>
+  </div>
+  <div class="stat-card glow-card">
+    <div class="stat-icon orange">⏳</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ pending_count }}</div>
+      <div class="stat-label">{{ t('vault_stat_pending') }}</div>
+    </div>
+  </div>
+</div>
+
+{% if documents %}
+  <div class="vault-grid">
+    {% for doc in documents %}
+      <div class="vault-card scroll-reveal" id="vault-card-{{ doc['id'] }}">
+        <div class="vault-card-header">
+          <div class="vault-card-icon">{{ doc['icon'] }}</div>
+          <div class="vault-card-info">
+            <div class="vault-card-name" title="{{ doc['original_name'] }}">{{ doc['original_name'] }}</div>
+            <span class="badge {{ 'badge-success' if doc['ai_summary'] else 'badge-warning' }}" id="status-{{ doc['id'] }}">
+              {{ t('vault_status_analyzed') if doc['ai_summary'] else t('vault_status_pending') }}
+            </span>
+          </div>
+        </div>
+
+        <div class="vault-card-meta">
+          <span>{{ doc['icon'] }} {{ t('vault_type_' + doc['file_type']) }}</span>
+          <span>📏 {{ doc['size_display'] }}</span>
+          <span>🕐 {{ doc['time_ago'] }}</span>
+        </div>
+
+        {% if doc['ai_analysed_at'] %}
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:8px;">
+            {{ t('vault_analysed_at') }}: {{ doc['analyzed_time_ago'] }}
+          </div>
+        {% endif %}
+
+        <div class="vault-card-actions">
+          <a href="{{ url_for('vault.serve_file', vault_id=doc['id']) }}" class="btn btn-outline btn-sm" target="_blank">
+            👁 {{ t('vault_detail_view') }}
+          </a>
+          <button class="btn btn-primary btn-sm" onclick="analyseDocument({{ doc['id'] }}, '{{ doc['original_name']|e }}')" id="analyse-btn-{{ doc['id'] }}">
+            🤖 {{ t('vault_detail_analyze_btn') }}
+          </button>
+          <form method="POST" action="{{ url_for('vault.delete', vault_id=doc['id']) }}"
+            onsubmit="return confirm({{ t('vault_delete_confirm', name=doc['original_name'])|tojson }})" style="display:inline;">
+            <button class="btn btn-danger btn-sm btn-icon" aria-label="Delete">🗑️</button>
+          </form>
+        </div>
+
+        <div id="analysis-{{ doc['id'] }}" style="display:none; margin-top:16px;">
+          <div class="vault-analysis-loading" id="loading-{{ doc['id'] }}">
+            <div class="spinner"></div>
+            <span>{{ t('vault_detail_analyzing') }}</span>
+          </div>
+          <div id="results-{{ doc['id'] }}" style="display:none;">
+            <div class="vault-analysis-block summary">
+              <div class="block-label">📋 {{ t('vault_detail_summary') }}</div>
+              <div id="summary-text-{{ doc['id'] }}"></div>
+            </div>
+            <div class="vault-analysis-block conflicts" id="conflicts-block-{{ doc['id'] }}">
+              <div class="block-label">⚠️ {{ t('vault_detail_conflicts') }}</div>
+              <div id="conflicts-text-{{ doc['id'] }}"></div>
+            </div>
+            <div class="vault-analysis-block suggestions">
+              <div class="block-label">💡 {{ t('vault_detail_suggestions') }}</div>
+              <div id="suggestions-text-{{ doc['id'] }}"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card scroll-reveal">
+    <div class="empty-state">
+      <div class="empty-icon">📁</div>
+      <h3>{{ t('vault_empty_no_files') }}</h3>
+      <p>{{ t('vault_empty_upload_first') }}</p>
+      <button class="btn btn-primary mt-2" onclick="openModal('uploadModal')">
+        + {{ t('vault_upload_btn') }}
+      </button>
+    </div>
+  </div>
+{% endif %}
+
+{% if documents %}
+<div class="card mt-3 scroll-reveal">
+  <div class="card-header">
+    <span class="card-title">🤖 {{ t('vault_detail_chat') }}</span>
+  </div>
+
+  <div class="vault-chat-disclaimer">
+    ⚠️ <strong>{{ t('vault_chat_disclaimer') }}</strong>
+  </div>
+
+  <div class="vault-chat-container">
+    <div class="vault-chat-messages" id="vaultChatMessages" role="log" aria-live="polite">
+      <div class="chat-bubble bot">
+        <div>{{ t('vault_chat_welcome') }}</div>
+        <div class="bubble-meta">{{ t('vault_chat_source') }}</div>
+      </div>
+    </div>
+
+    <div class="vault-chat-input-area">
+      <select class="form-control" id="vaultChatDocSelect" style="max-width:200px; font-size:0.8rem; padding:8px 12px;">
+        <option value="">— {{ t('general') }} —</option>
+        {% for doc in documents %}
+          <option value="{{ doc['id'] }}">{{ doc['icon'] }} {{ doc['original_name'][:30] }}</option>
+        {% endfor %}
+      </select>
+      <input
+        type="text"
+        class="vault-chat-input"
+        id="vaultChatInput"
+        placeholder="{{ t('vault_detail_chat_placeholder') }}"
+        maxlength="500"
+        autocomplete="off"
+      />
+      <button class="vault-chat-send-btn" id="vaultSendBtn" onclick="sendVaultMessage()" title="{{ t('send') }}">
+        ➤
+      </button>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+
+<div class="modal-backdrop" id="uploadModal" role="dialog" aria-modal="true" aria-label="{{ t('vault_upload_modal_title') }}">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📁 {{ t('vault_upload_modal_title') }}</span>
+      <button class="modal-close" onclick="closeModal('uploadModal')" aria-label="Close">✕</button>
+    </div>
+    <form method="POST" action="{{ url_for('vault.upload') }}" enctype="multipart/form-data" id="uploadForm">
+      <div class="modal-body">
+        <div class="form-group">
+          <div class="vault-upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click();">
+            <div class="upload-icon">📤</div>
+            <div class="upload-text">{{ t('vault_upload_drag_drop') }}</div>
+            <div class="upload-hint">{{ t('vault_upload_limit') }}</div>
+          </div>
+          <input type="file" name="file" id="fileInput" style="display:none;"
+            accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" />
+          <div class="vault-file-selected" id="fileSelected" style="display:none;">
+            <span>📄</span>
+            <span class="file-name" id="selectedFileName"></span>
+            <span class="file-remove" id="fileRemove" onclick="removeSelectedFile()">✕</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">{{ t('vault_type_prescription') }} *</label>
+          <select name="file_type" class="form-control" required>
+            <option value="prescription">{{ t('vault_type_prescription') }}</option>
+            <option value="report">{{ t('vault_type_report') }}</option>
+            <option value="xray">{{ t('vault_type_xray') }}</option>
+            <option value="discharge">{{ t('vault_type_discharge') }}</option>
+            <option value="other">{{ t('vault_type_other') }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">{{ t('vault_upload_notes') }}</label>
+          <textarea name="notes" class="form-control"
+            placeholder="{{ t('vault_upload_notes_hint') }}" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('uploadModal')">{{ t('cancel') }}</button>
+        <button type="submit" class="btn btn-primary" id="uploadSubmitBtn">📤 {{ t('vault_upload_submit') }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const I18N = {
+    analyzing: {{ t('vault_detail_analyzing')|tojson }},
+    chatSource: {{ t('vault_chat_source')|tojson }},
+    you: {{ t('you')|tojson }},
+    send: {{ t('send')|tojson }},
+    chatError: {{ t('chat_error')|tojson }},
+  };
+
+  function openModal(id)  { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-backdrop').forEach(b => {
+    b.addEventListener('click', e => { if (e.target === b) b.classList.remove('open'); });
+  });
+
+  // ── File Upload Zone ──────────────────────────────────────────────────────
+  const uploadZone = document.getElementById('uploadZone');
+  const fileInput = document.getElementById('fileInput');
+  const fileSelected = document.getElementById('fileSelected');
+  const selectedFileName = document.getElementById('selectedFileName');
+
+  uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('drag-over');
+  });
+  uploadZone.addEventListener('dragleave', () => {
+    uploadZone.classList.remove('drag-over');
+  });
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    if (e.dataTransfer.files.length > 0) {
+      fileInput.files = e.dataTransfer.files;
+      showSelectedFile(e.dataTransfer.files[0]);
+    }
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+      showSelectedFile(fileInput.files[0]);
+    }
+  });
+
+  function showSelectedFile(file) {
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+    selectedFileName.textContent = file.name + ' (' + sizeMB + ' MB)';
+    fileSelected.style.display = 'flex';
+    uploadZone.style.display = 'none';
+  }
+
+  function removeSelectedFile() {
+    fileInput.value = '';
+    fileSelected.style.display = 'none';
+    uploadZone.style.display = 'block';
+  }
+
+  // ── AI Analysis ───────────────────────────────────────────────────────────
+  async function analyseDocument(vaultId, filename) {
+    const analysisDiv = document.getElementById('analysis-' + vaultId);
+    const loadingDiv = document.getElementById('loading-' + vaultId);
+    const resultsDiv = document.getElementById('results-' + vaultId);
+    const btn = document.getElementById('analyse-btn-' + vaultId);
+
+    analysisDiv.style.display = 'block';
+    loadingDiv.style.display = 'flex';
+    resultsDiv.style.display = 'none';
+    btn.disabled = true;
+    btn.innerHTML = '⏳ ' + I18N.analyzing;
+
+    try {
+      const res = await fetch('/vault/analyse/' + vaultId, { method: 'POST' });
+      const data = await res.json();
+
+      loadingDiv.style.display = 'none';
+
+      if (data.success) {
+        document.getElementById('summary-text-' + vaultId).textContent = data.summary;
+        document.getElementById('conflicts-text-' + vaultId).textContent = data.conflicts;
+        document.getElementById('suggestions-text-' + vaultId).textContent = data.suggestions;
+        resultsDiv.style.display = 'block';
+
+        const statusBadge = document.getElementById('status-' + vaultId);
+        statusBadge.className = 'badge badge-success';
+        statusBadge.textContent = {{ t('vault_status_analyzed')|tojson }};
+
+        btn.innerHTML = '🔄 {{ t("vault_detail_reanalyze")|e }}';
+        btn.disabled = false;
+      } else {
+        resultsDiv.innerHTML = '<div style="padding:16px; color:var(--danger);">Analysis failed. Please try again.</div>';
+        resultsDiv.style.display = 'block';
+        btn.innerHTML = '🤖 {{ t("vault_detail_analyze_btn")|e }}';
+        btn.disabled = false;
+      }
+    } catch(err) {
+      loadingDiv.style.display = 'none';
+      resultsDiv.innerHTML = '<div style="padding:16px; color:var(--danger);">Network error. Please try again.</div>';
+      resultsDiv.style.display = 'block';
+      btn.innerHTML = '🤖 {{ t("vault_detail_analyze_btn")|e }}';
+      btn.disabled = false;
+    }
+  }
+
+  // ── Vault Chat ────────────────────────────────────────────────────────────
+  const vaultMessages = document.getElementById('vaultChatMessages');
+  const vaultInput = document.getElementById('vaultChatInput');
+  const vaultSendBtn = document.getElementById('vaultSendBtn');
+  const vaultDocSelect = document.getElementById('vaultChatDocSelect');
+
+  if (vaultInput) {
+    vaultInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendVaultMessage(); }
+    });
+  }
+
+  function appendVaultBubble(text, role, meta = '') {
+    const div = document.createElement('div');
+    div.className = 'chat-bubble ' + role;
+    div.innerHTML = text + '<div class="bubble-meta">' + meta + '</div>';
+    vaultMessages.appendChild(div);
+    vaultMessages.scrollTop = vaultMessages.scrollHeight;
+    return div;
+  }
+
+  function showVaultTyping() {
+    const t = document.createElement('div');
+    t.className = 'typing-indicator';
+    t.id = 'vaultTypingIndicator';
+    t.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+    vaultMessages.appendChild(t);
+    vaultMessages.scrollTop = vaultMessages.scrollHeight;
+  }
+
+  function removeVaultTyping() {
+    const el = document.getElementById('vaultTypingIndicator');
+    if (el) el.remove();
+  }
+
+  async function sendVaultMessage() {
+    const msg = vaultInput.value.trim();
+    if (!msg) return;
+
+    const now = new Date().toTimeString().slice(0,5);
+    appendVaultBubble(msg, 'user', I18N.you + ' · ' + now);
+    vaultInput.value = '';
+
+    vaultSendBtn.disabled = true;
+    showVaultTyping();
+
+    const vaultId = vaultDocSelect ? vaultDocSelect.value : null;
+
+    try {
+      const res = await fetch('/vault/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, vault_id: vaultId ? parseInt(vaultId) : null })
+      });
+      const data = await res.json();
+      removeVaultTyping();
+      appendVaultBubble(data.response, 'bot', I18N.chatSource + ' · ' + now);
+    } catch(err) {
+      removeVaultTyping();
+      appendVaultBubble(I18N.chatError, 'bot', I18N.chatSource);
+    }
+
+    vaultSendBtn.disabled = false;
+    vaultInput.focus();
+  }
+</script>
+{% endblock %}

@@ -114,6 +114,39 @@ def init_db():
         )
     """)
 
+    # ─── HEALTH VAULT TABLE ─────────────────────────────────────────────────────
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS health_vault (
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id        INTEGER NOT NULL,
+            file_name      TEXT    NOT NULL,
+            original_name  TEXT    NOT NULL,
+            file_type      TEXT    NOT NULL,
+            file_path      TEXT    NOT NULL,
+            file_size      INTEGER,
+            ai_summary     TEXT,
+            ai_conflicts   TEXT,
+            ai_suggestions TEXT,
+            ai_analysed_at TEXT,
+            uploaded_at    TEXT    DEFAULT (datetime('now')),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+
+    # ─── VAULT CHAT TABLE ───────────────────────────────────────────────────────
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS vault_chat (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id    INTEGER NOT NULL,
+            vault_id   INTEGER,
+            role       TEXT    NOT NULL CHECK(role IN ('user', 'assistant')),
+            message    TEXT    NOT NULL,
+            created_at TEXT    DEFAULT (datetime('now')),
+            FOREIGN KEY (user_id)  REFERENCES users(id)            ON DELETE CASCADE,
+            FOREIGN KEY (vault_id) REFERENCES health_vault(id)     ON DELETE SET NULL
+        )
+    """)
+
     conn.commit()
     conn.close()
     print("✅ Database initialized successfully.")
