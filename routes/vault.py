@@ -245,13 +245,17 @@ def analyse(vault_id):
 @login_required
 def ai_status():
     """Debug endpoint: check if OpenAI is configured (does not expose full key)."""
-    from utils.openai_helper import get_openai_api_key, get_openai_model, is_openai_configured
+    from utils.openai_helper import get_openai_api_key, get_openai_model, get_groq_api_key, get_groq_model, is_openai_configured, is_groq_configured
 
     key = get_openai_api_key()
+    groq_key = get_groq_api_key()
     return jsonify({
         'openai_configured': is_openai_configured(),
-        'key_hint': f'{key[:7]}…' if len(key) > 7 else ('set' if key else 'missing'),
-        'model': get_openai_model(),
+        'groq_configured': is_groq_configured(),
+        'openai_key_hint': f'{key[:7]}…' if len(key) > 7 else ('set' if key else 'missing'),
+        'groq_key_hint': f'{groq_key[:7]}…' if len(groq_key) > 7 else ('set' if groq_key else 'missing'),
+        'openai_model': get_openai_model(),
+        'groq_model': get_groq_model(),
     })
 
 

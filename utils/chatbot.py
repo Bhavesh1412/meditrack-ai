@@ -5,7 +5,7 @@ Tries OpenAI API first; falls back to local keyword-based responses.
 
 import re
 
-from utils.openai_helper import create_openai_client, get_openai_model, is_openai_configured
+from utils.openai_helper import chat_completions_create, get_groq_model, is_groq_configured, is_openai_configured
 
 # ─── SYSTEM PROMPT FOR THE AI ────────────────────────────────────────────────
 SYSTEM_PROMPT = """
@@ -188,15 +188,11 @@ def get_ai_response(user_message: str, chat_history: list = None, lang: str = 'e
     Returns:
         dict with 'response' (str) and 'source' ('openai' or 'local')
     """
-    # ── TRY OPENAI API ────────────────────────────────────────────────────────
-    if is_openai_configured():
+    # ── TRY AI (OpenAI first, Groq as free fallback) ─────────────────────────
+    if is_openai_configured() or is_groq_configured():
         try:
-            client = create_openai_client()
-
-            # Build message history for context-aware conversation
             messages = [{"role": "system", "content": get_system_prompt(lang)}]
 
-            # Add up to last 6 messages for context (keeps API cost low)
             if chat_history:
                 for entry in chat_history[-6:]:
                     messages.append({
@@ -206,20 +202,19 @@ def get_ai_response(user_message: str, chat_history: list = None, lang: str = 'e
 
             messages.append({"role": "user", "content": user_message})
 
-            response = client.chat.completions.create(
-                model=get_openai_model(),
-                messages=messages,
+            response, source = chat_completions_create(
+                messages,
                 max_tokens=200,
-                temperature=0.7
+                temperature=0.7,
             )
 
             return {
                 "response": response.choices[0].message.content,
-                "source": "openai"
+                "source": source   # 'openai' or 'groq'
             }
 
         except Exception as e:
-            print(f"⚠️ OpenAI API error: {e}. Falling back to local responses.")
+            print(f"⚠️ AI API error: {e}. Falling back to local responses.")
 
     # ── FALLBACK: LOCAL KEYWORD MATCHING ─────────────────────────────────────
     return {

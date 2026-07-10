@@ -80,6 +80,7 @@
     medibotAi: {{ t('medibot_ai')|tojson }},
     chatError: {{ t('chat_error')|tojson }},
     confirmClear: {{ t('confirm_clear_chat')|tojson }},
+    groqAi: 'Groq AI',
   };
 
   const messagesDiv = document.getElementById('chatMessages');
@@ -144,7 +145,7 @@
       const data = await res.json();
       removeTyping();
 
-      const sourceLabel = data.source === 'openai' ? I18N.medibotAi : I18N.medibot;
+      const sourceLabel = data.source === 'openai' ? I18N.medibotAi : (data.source === 'groq' ? I18N.groqAi : I18N.medibot);
       appendBubble(data.response, 'bot', `${sourceLabel} · ${now}`);
     } catch(err) {
       removeTyping();

@@ -9,8 +9,10 @@ from typing import Optional
 
 from utils.openai_helper import (
     OPENAI_AVAILABLE,
-    create_openai_client,
+    chat_completions_create,
+    get_groq_model,
     get_openai_model,
+    is_groq_configured,
     is_openai_configured,
 )
 
@@ -101,7 +103,6 @@ def analyse_document(extracted_text: str, existing_medicines: list, lang: str = 
         return _local_analysis_fallback(extracted_text, medicines_str, reason='no_key', lang=lang)
 
     try:
-        client = create_openai_client()
         user_prompt = f"""Analyse this medical document:
 
 --- DOCUMENT TEXT ---
@@ -112,14 +113,25 @@ Patient's current medicines: {medicines_str}
 
 Return ONLY valid JSON with keys: summary, conflicts, suggestions."""
 
-        response = client.chat.completions.create(
-            model=get_openai_model(),
+        response, source = chat_completions_create(
             messages=[
                 {'role': 'system', 'content': ANALYSIS_SYSTEM_PROMPT},
-                {'role': 'user', 'content': user_prompt},
+                {'role': 'user',   'content': user_prompt},
             ],
             max_tokens=600,
             temperature=0.5,
+        )
+
+        raw = response.choices[0].message.content.strip()
+        result = _parse_analysis_json(raw)
+        result['source'] = source
+        return result
+
+    except Exception as e:
+        print(f'Vault AI analysis error: {e}')
+        return _local_analysis_fallback(
+            extracted_text, medicines_str,
+            reason='api_error', error=str(e), lang=lang,
         )
 
         raw = response.choices[0].message.content.strip()
@@ -200,25 +212,24 @@ def vault_chat_response(
             'Disclaimer: यह केवल सामान्य जानकारी है, चिकित्सा सलाह नहीं।'
         )
 
-    if not is_openai_configured():
+    if not (is_openai_configured() or is_groq_configured()):
         if lang == 'hi':
             return {
                 'response': (
-                    'AI चैट के लिए OPENAI_API_KEY Render Environment में सेट करें और redeploy करें। '
+                    'AI चैट के लिए OPENAI_API_KEY या GROQ_API_KEY Render Environment में सेट करें और redeploy करें। '
                     'फिर दस्तावेज़ पर Re-analyze दबाएँ। 🩺'
                 ),
                 'source': 'local',
             }
         return {
             'response': (
-                'Health Vault AI needs OPENAI_API_KEY in Render → Environment. '
+                'Health Vault AI needs OPENAI_API_KEY or GROQ_API_KEY in Render → Environment. '
                 'After saving, wait for redeploy, then click Re-analyze on your document. 🩺'
             ),
             'source': 'local',
         }
 
     try:
-        client = create_openai_client()
         messages = [
             {'role': 'system', 'content': system_prompt},
             {'role': 'system', 'content': context_block},
@@ -230,8 +241,7 @@ def vault_chat_response(
 
         messages.append({'role': 'user', 'content': user_message})
 
-        response = client.chat.completions.create(
-            model=get_openai_model(),
+        response, source = chat_completions_create(
             messages=messages,
             max_tokens=400,
             temperature=0.7,
@@ -239,7 +249,7 @@ def vault_chat_response(
 
         return {
             'response': response.choices[0].message.content,
-            'source': 'openai',
+            'source': source,
         }
 
     except Exception as e:
